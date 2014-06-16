@@ -25,3 +25,7 @@ release.properties
 # local
 .idea
 *.iml
+
+.classpath
+.settings/
+.project

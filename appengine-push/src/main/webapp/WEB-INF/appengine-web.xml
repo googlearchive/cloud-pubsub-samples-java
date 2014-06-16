@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+  <application>{your-appengine-app-id}</application>
+  <version>1</version>
+
+  <threadsafe>true</threadsafe>
+
+  <system-properties>
+    <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
+
+    <!-- Uncomment the following two properties to run locally -->
+    <!-- Obtain this from https://cloud.google.com/console/project/your_project/apiui/credential -->
+    <!-- <property name="com.google.cloud.pubsub.client.demos.appengine.serviceAccountEmail" value="{email-address-of-your-service-account}"/> -->
+    <!-- Download this file from https://cloud.google.com/console/project/your_project/apiui/credential -->
+    <!-- <property name="com.google.cloud.pubsub.client.demos.appengine.p12certificatePath" value="{the-path-to-your-p12-file}"/> -->
+
+    <!-- Recommended to avoid spoofing. -->
+    <property name="com.google.cloud.pubsub.client.demos.appengine.subscriptionUniqueToken" value="{replace-with-a-unique-value}"/>
+    <!-- Obtain an API Key from https://cloud.google.com/console/project/apps~{your-project}/apiui/credential -->
+    <property name="com.google.cloud.pubsub.client.demos.appengine.apiKey" value="{replace-with-a-valid-api-key}"/>
+
+  </system-properties>
+</appengine-web-app>
