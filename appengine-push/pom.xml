@@ -174,7 +174,7 @@
        <artifactId>google-api-services-pubsub</artifactId>
        <scope>system</scope>
        <version>${google-api-pubsub.version}</version>
-       <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/libpubsub.v1beta1.jar</systemPath>
+       <systemPath>${basedir}/src/main/webapp/WEB-INF/lib/google-api-services-pubsub-v1beta1-rev20140623165559-1.18.0-rc.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.codehaus.jackson</groupId>

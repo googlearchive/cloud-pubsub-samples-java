@@ -87,7 +87,7 @@
                             <artifactId>google-api-services-pubsub</artifactId>
                             <version>${google-api-pubsub.version}</version>
                             <packaging>jar</packaging>
-                            <file>${basedir}/lib/libpubsub.v1beta1.jar</file>
+                            <file>${basedir}/lib/google-api-services-pubsub-v1beta1-rev20140623165559-1.18.0-rc.jar</file>
                         </configuration>
                     </execution>
                 </executions>
