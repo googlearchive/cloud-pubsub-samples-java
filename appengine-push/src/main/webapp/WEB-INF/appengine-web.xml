@@ -16,8 +16,6 @@
 
     <!-- Recommended to avoid spoofing. -->
     <property name="com.google.cloud.pubsub.client.demos.appengine.subscriptionUniqueToken" value="{replace-with-a-unique-value}"/>
-    <!-- Obtain an API Key from https://cloud.google.com/console/project/apps~{your-project}/apiui/credential -->
-    <property name="com.google.cloud.pubsub.client.demos.appengine.apiKey" value="{replace-with-a-valid-api-key}"/>
 
   </system-properties>
 </appengine-web-app>

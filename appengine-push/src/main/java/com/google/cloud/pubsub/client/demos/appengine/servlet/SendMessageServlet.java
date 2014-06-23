@@ -36,7 +36,8 @@ public class SendMessageServlet extends HttpServlet {
     Pubsub client = PubsubUtils.getClient();
     String message = req.getParameter("message");
     if (!"".equals(message)) {
-      String fullTopicName = PubsubUtils.getProjectId() + "/" + PubsubUtils.getAppTopicName();
+      String fullTopicName = String.format("/topics/%s/%s", PubsubUtils.getProjectId(),
+              PubsubUtils.getAppTopicName());
       PubsubMessage pubsubMessage = new PubsubMessage();
       pubsubMessage.encodeData(message.getBytes("UTF-8"));
       PublishRequest publishRequest = new PublishRequest();

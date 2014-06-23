@@ -58,7 +58,8 @@ public class InitServlet extends HttpServlet {
 
   private final void setupTopic(Pubsub client)
       throws IOException {
-    String fullName = PubsubUtils.getProjectId() + "/" + PubsubUtils.getAppTopicName();
+    String fullName = String.format("/topics/%s/%s", PubsubUtils.getProjectId(),
+            PubsubUtils.getAppTopicName());
 
     try {
       client.topics().get(fullName).execute();
@@ -75,14 +76,16 @@ public class InitServlet extends HttpServlet {
 
   private final void setupSubscription(Pubsub client)
       throws IOException {
-    String fullName = PubsubUtils.getProjectId() + "/" + PubsubUtils.getAppSubscriptionName();
+    String fullName = String.format("/subscriptions/%s/%s", PubsubUtils.getProjectId(),
+            PubsubUtils.getAppSubscriptionName());
 
     try {
       client.subscriptions().get(fullName).execute();
     } catch (GoogleJsonResponseException e) {
       if (e.getStatusCode() == 404) {
         // Create the subscription if it doesn't exist
-        String fullTopicName = PubsubUtils.getProjectId() + "/" + PubsubUtils.getAppTopicName();
+        String fullTopicName = String.format("/topics/%s/%s", PubsubUtils.getProjectId(),
+                PubsubUtils.getAppTopicName());
         PushConfig pushConfig = new PushConfig().setPushEndpoint(PubsubUtils.getAppEndpointUrl());
         Subscription subscription = new Subscription()
             .setTopic(fullTopicName)
