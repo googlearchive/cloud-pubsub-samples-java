@@ -1,5 +1,11 @@
 Instructions for the Cloud Pub/Sub App Engine Sample
 
+Note: The push endpoints don't work with the App Engine's local
+devserver. The push notifications will go to an HTTP URL on the App
+Engine server even when you run this sample locally. So we recommend
+you deploy and run the app on App Engine.
+TODO(tmatsuo): Better implementation for devserver.
+
 = Register Your Application
 
 * Go to https://cloud.google.com/console/project and create a new
@@ -7,7 +13,6 @@ Instructions for the Cloud Pub/Sub App Engine Sample
   with the same ID as the project. We will use this App Engine
   application ID later, so make note of the application ID.
 * Enable the "Google Cloud Pub/Sub" API under "APIs & auth > APIs."
-* Go to "Credentials" and create a new API Key, make note of the Key.
 * For local development, also create a new client ID of type Service
   account. Save the private key in a secure location and make note of
   the service account email address.
@@ -22,8 +27,6 @@ need to set your JAVA_HOME
 * Edit src/main/webapp/WEB-INF/appengine-web.xml, and:
     * Enter the unique application ID (you chose it in the prior step)
       between the <application> tags.
-    * Set the com.google.cloud.pubsub.client.demos.appengine.apiKey
-      property with the key generated before.
     * Set the
       com.google.cloud.pubsub.client.demos.appengine.subscriptionUniqueToken
       property with a unique alphanumeric combination of your choice.
@@ -33,6 +36,20 @@ need to set your JAVA_HOME
   [the LogManager documentation][1].
 
 = Running and Deploying Your Application from the Command Line
+
+== To deploy your application to appspot.com:
+
+You can deploy the application by running:
+
+    $ mvn appengine:update
+
+If this is the first time you have run "update" on the project, a
+browser window will open prompting you to log in. Log in with the same
+Google account the app is registered with.
+
+Then access the following URL:
+
+https://{your-application-id}.appspot.com/
 
 == To run your application locally on a development server:
 
@@ -50,16 +67,6 @@ Edit the appengine-web.xml file with the following 2 changes:
 Then start your server by running:
 
     $ mvn appengine:devserver
-
-== To deploy your application to appspot.com:
-
-You can deploy the application by running:
-
-    $ mvn appengine:update
-
-If this is the first time you have run "update" on the project, a
-browser window will open prompting you to log in. Log in with the same
-Google account the app is registered with.
 
 = Setup Project in Eclipse
 

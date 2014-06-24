@@ -35,13 +35,24 @@ public class Utils {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
     /**
+     * Enum representing a resource type.
+     */
+    public enum ResourceType {
+        TOPIC("topics"),
+        SUBSCRIPTION("subscriptions");
+        public String collectionName;
+        private ResourceType(String collectionName) {
+            this.collectionName = collectionName;
+        }
+    }
+    /**
      * Returns the fully qualified resource name for Pub/Sub.
      *
      * @param resource topic name or subscription name
      * @return A string in a form of PROJECT_NAME/RESOURCE_NAME
      */
-    public static String fqrn(String project, String resource) {
-        return String.format("%s/%s", project, resource);
+    public static String fqrn(ResourceType resourceType, String project, String resource) {
+        return String.format("/%s/%s/%s", resourceType.collectionName, project, resource);
     }
 
     private static Credential authorize() throws Exception {

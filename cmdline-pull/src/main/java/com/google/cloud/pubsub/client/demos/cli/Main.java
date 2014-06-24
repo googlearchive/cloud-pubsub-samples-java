@@ -53,7 +53,7 @@ public class Main {
 
     public static void listTopics(Pubsub client, String[] args) throws IOException {
         Pubsub.Topics.List list = client.topics().list().setQuery(
-                String.format("cloud.googleapis.com/project in (%s)", args[0]));
+                String.format("cloud.googleapis.com/project in (/projects/%s)", args[0]));
         String nextPageToken = null;
         do {
             if (nextPageToken != null) {
@@ -69,7 +69,7 @@ public class Main {
 
     public static void listSubscriptions(Pubsub client, String[] args) throws IOException {
         Pubsub.Subscriptions.List list = client.subscriptions().list().setQuery(
-                String.format("cloud.googleapis.com/project in (%s)", args[0]));
+                String.format("cloud.googleapis.com/project in (/projects/%s)", args[0]));
         String nextPageToken = null;
         do {
             if (nextPageToken != null) {
@@ -85,14 +85,14 @@ public class Main {
 
     public static void createTopic(Pubsub client, String[] args) throws IOException {
         checkArgsLength(args, 3);
-        Topic topic = new Topic().setName(Utils.fqrn(args[0], args[2]));
+        Topic topic = new Topic().setName(Utils.fqrn(Utils.ResourceType.TOPIC, args[0], args[2]));
         topic = client.topics().create(topic).execute();
         System.out.printf("Topic %s was created.\n", topic.getName());
     }
 
     public static void deleteTopic(Pubsub client, String[] args) throws IOException {
         checkArgsLength(args, 3);
-        String topicName = Utils.fqrn(args[0], args[2]);
+        String topicName = Utils.fqrn(Utils.ResourceType.TOPIC, args[0], args[2]);
         client.topics().delete(topicName).execute();
         System.out.printf("Topic %s was deleted.\n", topicName);
     }
@@ -100,7 +100,8 @@ public class Main {
     public static void createSubscription(Pubsub client, String[] args) throws IOException {
         checkArgsLength(args, 4);
         Subscription subscription = new Subscription()
-            .setTopic(Utils.fqrn(args[0], args[3])).setName(Utils.fqrn(args[0], args[2]));
+                .setTopic(Utils.fqrn(Utils.ResourceType.TOPIC, args[0], args[3]))
+                .setName(Utils.fqrn(Utils.ResourceType.SUBSCRIPTION, args[0], args[2]));
         subscription = client.subscriptions().create(subscription).execute();
         System.out.printf("Subscription %s was created.\n", subscription.getName());
         System.out.println(subscription.toPrettyString());
@@ -108,7 +109,7 @@ public class Main {
 
     public static void deleteSubscription(Pubsub client, String[] args) throws IOException {
         checkArgsLength(args, 3);
-        String subscriptionName = Utils.fqrn(args[0], args[2]);
+        String subscriptionName = Utils.fqrn(Utils.ResourceType.SUBSCRIPTION, args[0], args[2]);
         client.subscriptions().delete(subscriptionName).execute();
         System.out.printf("Subscription %s was deleted.\n", subscriptionName);
     }
@@ -117,7 +118,7 @@ public class Main {
         checkArgsLength(args, 5);
         String server = args[3];
         String channel = args[4];
-        String topic = Utils.fqrn(args[0], args[2]);
+        String topic = Utils.fqrn(Utils.ResourceType.TOPIC, args[0], args[2]);
         String nick = String.format("bot-%s", args[0]);
         Socket socket = new Socket(server, PORT);
         BufferedWriter writer = new BufferedWriter(
@@ -174,7 +175,7 @@ public class Main {
 
     public static void pullMessages(Pubsub client, String[] args) throws IOException {
         checkArgsLength(args, 3);
-        String subscriptionName = Utils.fqrn(args[0], args[2]);
+        String subscriptionName = Utils.fqrn(Utils.ResourceType.SUBSCRIPTION, args[0], args[2]);
         PullRequest pullRequest = new PullRequest();
         pullRequest.setSubscription(subscriptionName);
         pullRequest.setReturnImmediately(false);

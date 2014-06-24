@@ -45,8 +45,6 @@ public final class PubsubUtils {
     HttpTransport transport = new UrlFetchTransport();
     JsonFactory jsonFactory = new JacksonFactory();
 
-    String apiKey = System.getProperty(
-        "com.google.cloud.pubsub.client.demos.appengine.apiKey");
     String serviceAccountEmail = System.getProperty(
         "com.google.cloud.pubsub.client.demos.appengine.serviceAccountEmail");
     String p12CertPath = System.getProperty(
@@ -71,8 +69,7 @@ public final class PubsubUtils {
 
     Pubsub client = new Pubsub.Builder(transport, jsonFactory, credential)
         .setApplicationName(APPLICATION_NAME)
-        .setGoogleClientRequestInitializer(
-            new CommonGoogleJsonClientRequestInitializer(apiKey))
+        .setHttpRequestInitializer(credential)
         .build();
 
     return client;
