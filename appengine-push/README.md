@@ -1,6 +1,6 @@
 # cloud-pubsub-samples-java
 
-## appengine-pull
+## appengine-push
 
 Note: The push endpoints don't work with the App Engine's local
 devserver. The push notifications will go to an HTTP URL on the App
@@ -19,14 +19,12 @@ TODO(tmatsuo): Better implementation for devserver.
   account. Save the private key in a secure location and make note of
   the service account email address.
 
-## Prerequisites: install Java 7, and Maven 3.1.0 or higher. You may
-   need to set your JAVA_HOME
+## Prerequisites
 
-```
-> cd [someDirectory]
-> unzip [theCodeZipFile]
-> mvn clean package
-```
+Install Java 7, and Maven 3.1.0 or higher. You may need to set your
+JAVA_HOME.
+
+## Configuration
 
 - Edit src/main/webapp/WEB-INF/appengine-web.xml, and:
     - Enter the unique application ID (you chose it in the prior step)
