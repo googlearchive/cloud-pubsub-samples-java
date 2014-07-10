@@ -65,7 +65,7 @@ $ bin/pubsub-sample.sh \
 $ bin/pubsub-sample.sh MYPROJ pull_messages sub
 ```
 
-Enjoy!
+Please enjoy!
 
 
 [1]: https://console.developers.google.com/project
