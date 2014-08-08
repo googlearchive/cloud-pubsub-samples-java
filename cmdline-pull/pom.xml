@@ -42,8 +42,8 @@
     </developers>
 
     <properties>
-        <google-api-client.version>1.18.0-rc</google-api-client.version>
-        <google-api-pubsub.version>v1beta1-1.18.0-rc</google-api-pubsub.version>
+        <google-api-client.version>1.19.0</google-api-client.version>
+        <google-api-pubsub.version>v1beta1-rev5-1.19.0</google-api-pubsub.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -64,7 +64,7 @@
             <version>${google-api-client.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.google.api</groupId>
+            <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-pubsub</artifactId>
             <version>${google-api-pubsub.version}</version>
         </dependency>
@@ -72,26 +72,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-install-plugin</artifactId>
-                <version>2.4</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>install-file</goal>
-                        </goals>
-                        <configuration>
-                            <groupId>com.google.api</groupId>
-                            <artifactId>google-api-services-pubsub</artifactId>
-                            <version>${google-api-pubsub.version}</version>
-                            <packaging>jar</packaging>
-                            <file>${basedir}/lib/google-api-services-pubsub-v1beta1-rev20140623165559-1.18.0-rc.jar</file>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
