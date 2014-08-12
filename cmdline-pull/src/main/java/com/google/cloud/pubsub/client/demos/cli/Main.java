@@ -10,12 +10,18 @@ import com.google.api.services.pubsub.model.PullRequest;
 import com.google.api.services.pubsub.model.PullResponse;
 import com.google.api.services.pubsub.model.Subscription;
 import com.google.api.services.pubsub.model.Topic;
+import org.apache.commons.cli.BasicParser;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +37,15 @@ public class Main {
 
     private static final int PORT = 6667;
 
+    private static Options options;
+
+    static {
+        options = new Options();
+        options.addOption("noauth_local_webserver", false,
+                "do not use a local webserver for authentication");
+
+    }
+
     private static void checkArgsLength(String[] args, int min) {
         if (args.length < min) {
             help();
@@ -39,7 +54,11 @@ public class Main {
     }
 
     public static void help() {
-        System.err.println("Available arguments are:\n"
+        System.err.println("Usage: pubsub-sample.[sh|bat] [options] arguments");
+        HelpFormatter formatter = new HelpFormatter();
+        PrintWriter writer = new PrintWriter(System.err);
+        formatter.printOptions(writer, 80, options, 2, 2);
+        writer.print("Available arguments are:\n"
                         + "PROJ list_topics\n"
                         + "PROJ create_topic TOPIC\n"
                         + "PROJ delete_topic TOPIC\n"
@@ -49,6 +68,7 @@ public class Main {
                         + "PROJ connect_irc TOPIC SERVER CHANNEL\n"
                         + "PROJ pull_messages SUBSCRIPTION\n"
         );
+        writer.close();
     }
 
     public static void listTopics(Pubsub client, String[] args) throws IOException {
@@ -207,33 +227,36 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        checkArgsLength(args, 2);
-        Pubsub client = Utils.getClient();
+        CommandLineParser parser = new BasicParser();
+        CommandLine cmd = parser.parse(options, args);
+        String[] cmdArgs = cmd.getArgs();
+        checkArgsLength(cmdArgs, 2);
+        Pubsub client = Utils.getClient(cmd.hasOption("noauth_local_webserver"));
 
-        switch (args[1]) {
+        switch (cmdArgs[1]) {
             case "list_topics":
-                listTopics(client, args);
+                listTopics(client, cmdArgs);
                 break;
             case "create_topic":
-                createTopic(client, args);
+                createTopic(client, cmdArgs);
                 break;
             case "delete_topic":
-                deleteTopic(client, args);
+                deleteTopic(client, cmdArgs);
                 break;
             case "list_subscriptions":
-                listSubscriptions(client, args);
+                listSubscriptions(client, cmdArgs);
                 break;
             case "create_subscription":
-                createSubscription(client, args);
+                createSubscription(client, cmdArgs);
                 break;
             case "delete_subscription":
-                deleteSubscription(client, args);
+                deleteSubscription(client, cmdArgs);
                 break;
             case "connect_irc":
-                connectIrc(client, args);
+                connectIrc(client, cmdArgs);
                 break;
             case "pull_messages":
-                pullMessages(client, args);
+                pullMessages(client, cmdArgs);
                 break;
             default:
                 help();

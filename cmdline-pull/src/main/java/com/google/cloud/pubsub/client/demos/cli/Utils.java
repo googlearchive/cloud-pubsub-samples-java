@@ -5,6 +5,7 @@ import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInsta
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.extensions.java6.auth.oauth2.GooglePromptReceiver;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -55,7 +56,7 @@ public class Utils {
         return String.format("/%s/%s/%s", resourceType.collectionName, project, resource);
     }
 
-    private static Credential authorize() throws Exception {
+    private static Credential authorize(boolean noAuthLocalWebServer) throws Exception {
         // load client secrets
         InputStream inputStream = Utils.class.getResourceAsStream("/client_secrets.json");
         if (inputStream == null) {
@@ -73,7 +74,13 @@ public class Utils {
             .setDataStoreFactory(datastoreFactory)
             .build();
         // authorize
-        return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+        if (noAuthLocalWebServer) {
+            return new AuthorizationCodeInstalledApp(
+                    flow, new GooglePromptReceiver()).authorize("user");
+        } else {
+            return new AuthorizationCodeInstalledApp(
+                    flow, new LocalServerReceiver()).authorize("user");
+        }
     }
 
     /**
@@ -82,10 +89,10 @@ public class Utils {
      * @return Pubsub client.
      * @throws IOException when we can not load the private key file.
      */
-    public static Pubsub getClient() throws Exception {
+    public static Pubsub getClient(boolean noAuthLocalWebServer) throws Exception {
         datastoreFactory = new FileDataStoreFactory(CREDENTIALS_DIR);
         httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        Credential credential = authorize();
+        Credential credential = authorize(noAuthLocalWebServer);
         return new Pubsub.Builder(httpTransport, JSON_FACTORY, credential)
                 .setApplicationName(APP_NAME)
                 .build();
