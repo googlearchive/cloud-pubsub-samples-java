@@ -75,32 +75,47 @@ public class Main {
         Pubsub.Topics.List list = client.topics().list().setQuery(
                 String.format("cloud.googleapis.com/project in (/projects/%s)", args[0]));
         String nextPageToken = null;
+        boolean topicPrinted = false;
         do {
             if (nextPageToken != null) {
                 list.setPageToken(nextPageToken);
             }
             ListTopicsResponse response = list.execute();
-            for (Topic topic : response.getTopic()) {
-                System.out.println(topic.getName());
+            if (!response.isEmpty()) {
+                for (Topic topic : response.getTopic()) {
+                    topicPrinted = true;
+                    System.out.println(topic.getName());
+                }
             }
             nextPageToken = response.getNextPageToken();
         } while (nextPageToken != null);
+        if (!topicPrinted) {
+            System.out.println(String.format("There is no topic in the project '%s'.", args[0]));
+        }
     }
 
     public static void listSubscriptions(Pubsub client, String[] args) throws IOException {
         Pubsub.Subscriptions.List list = client.subscriptions().list().setQuery(
                 String.format("cloud.googleapis.com/project in (/projects/%s)", args[0]));
         String nextPageToken = null;
+        boolean subscriptionPrinted = false;
         do {
             if (nextPageToken != null) {
                 list.setPageToken(nextPageToken);
             }
             ListSubscriptionsResponse response = list.execute();
-            for (Subscription subscription : response.getSubscription()) {
-                System.out.println(subscription.toPrettyString());
+            if (!response.isEmpty()) {
+                for (Subscription subscription : response.getSubscription()) {
+                    subscriptionPrinted = true;
+                    System.out.println(subscription.toPrettyString());
+                }
             }
             nextPageToken = response.getNextPageToken();
         } while (nextPageToken != null);
+        if (!subscriptionPrinted) {
+            System.out.println(
+                    String.format("There is no subscription in the project '%s'.", args[0]));
+        }
     }
 
     public static void createTopic(Pubsub client, String[] args) throws IOException {
