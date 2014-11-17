@@ -71,9 +71,11 @@ public class Main {
         writer.close();
     }
 
-    public static void listTopics(Pubsub client, String[] args) throws IOException {
+    public static void listTopics(Pubsub client, String[] args)
+            throws IOException {
         Pubsub.Topics.List list = client.topics().list().setQuery(
-                String.format("cloud.googleapis.com/project in (/projects/%s)", args[0]));
+                String.format("cloud.googleapis.com/project in (/projects/%s)",
+                        args[0]));
         String nextPageToken = null;
         boolean topicPrinted = false;
         do {
@@ -90,13 +92,16 @@ public class Main {
             nextPageToken = response.getNextPageToken();
         } while (nextPageToken != null);
         if (!topicPrinted) {
-            System.out.println(String.format("There is no topic in the project '%s'.", args[0]));
+            System.out.println(String.format(
+                    "There is no topic in the project '%s'.", args[0]));
         }
     }
 
-    public static void listSubscriptions(Pubsub client, String[] args) throws IOException {
+    public static void listSubscriptions(Pubsub client, String[] args)
+            throws IOException {
         Pubsub.Subscriptions.List list = client.subscriptions().list().setQuery(
-                String.format("cloud.googleapis.com/project in (/projects/%s)", args[0]));
+                String.format("cloud.googleapis.com/project in (/projects/%s)",
+                        args[0]));
         String nextPageToken = null;
         boolean subscriptionPrinted = false;
         do {
@@ -113,52 +118,66 @@ public class Main {
             nextPageToken = response.getNextPageToken();
         } while (nextPageToken != null);
         if (!subscriptionPrinted) {
-            System.out.println(
-                    String.format("There is no subscription in the project '%s'.", args[0]));
+            System.out.println(String.format(
+                    "There is no subscription in the project '%s'.", args[0]));
         }
     }
 
-    public static void createTopic(Pubsub client, String[] args) throws IOException {
+    public static void createTopic(Pubsub client, String[] args)
+            throws IOException {
         checkArgsLength(args, 3);
-        Topic topic = new Topic().setName(Utils.fqrn(Utils.ResourceType.TOPIC, args[0], args[2]));
+        Topic topic = new Topic().setName(
+                Utils.getFullyQualifiedResourceName(Utils.ResourceType.TOPIC,
+                        args[0], args[2]));
         topic = client.topics().create(topic).execute();
         System.out.printf("Topic %s was created.\n", topic.getName());
     }
 
-    public static void deleteTopic(Pubsub client, String[] args) throws IOException {
+    public static void deleteTopic(Pubsub client, String[] args)
+            throws IOException {
         checkArgsLength(args, 3);
-        String topicName = Utils.fqrn(Utils.ResourceType.TOPIC, args[0], args[2]);
+        String topicName = Utils.getFullyQualifiedResourceName(
+                Utils.ResourceType.TOPIC, args[0], args[2]);
         client.topics().delete(topicName).execute();
         System.out.printf("Topic %s was deleted.\n", topicName);
     }
 
-    public static void createSubscription(Pubsub client, String[] args) throws IOException {
+    public static void createSubscription(Pubsub client, String[] args)
+            throws IOException {
         checkArgsLength(args, 4);
         Subscription subscription = new Subscription()
-                .setTopic(Utils.fqrn(Utils.ResourceType.TOPIC, args[0], args[3]))
-                .setName(Utils.fqrn(Utils.ResourceType.SUBSCRIPTION, args[0], args[2]));
+                .setTopic(Utils.getFullyQualifiedResourceName(
+                        Utils.ResourceType.TOPIC, args[0], args[3]))
+                .setName(Utils.getFullyQualifiedResourceName(
+                        Utils.ResourceType.SUBSCRIPTION, args[0], args[2]));
         subscription = client.subscriptions().create(subscription).execute();
-        System.out.printf("Subscription %s was created.\n", subscription.getName());
+        System.out.printf(
+                "Subscription %s was created.\n", subscription.getName());
         System.out.println(subscription.toPrettyString());
     }
 
-    public static void deleteSubscription(Pubsub client, String[] args) throws IOException {
+    public static void deleteSubscription(Pubsub client, String[] args)
+            throws IOException {
         checkArgsLength(args, 3);
-        String subscriptionName = Utils.fqrn(Utils.ResourceType.SUBSCRIPTION, args[0], args[2]);
+        String subscriptionName = Utils.getFullyQualifiedResourceName(
+                Utils.ResourceType.SUBSCRIPTION, args[0], args[2]);
         client.subscriptions().delete(subscriptionName).execute();
         System.out.printf("Subscription %s was deleted.\n", subscriptionName);
     }
 
-    public static void connectIrc(Pubsub client, String[] args) throws IOException {
+    public static void connectIrc(Pubsub client, String[] args)
+            throws IOException {
         checkArgsLength(args, 5);
         String server = args[3];
         String channel = args[4];
-        String topic = Utils.fqrn(Utils.ResourceType.TOPIC, args[0], args[2]);
+        String topic = Utils.getFullyQualifiedResourceName(
+                Utils.ResourceType.TOPIC, args[0], args[2]);
         String nick = String.format("bot-%s", args[0]);
         Socket socket = new Socket(server, PORT);
         BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(socket.getOutputStream()));
-        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(socket.getInputStream()));
 
         writer.write(String.format("NICK %s\r\n", nick));
         writer.write(String.format("USER %s 8 * : %s\r\n", nick, BOTNAME));
@@ -196,7 +215,8 @@ public class Main {
                 PubsubMessage pubsubMessage = new PubsubMessage();
                 Matcher m = p.matcher(line);
                 if (m.find()) {
-                    String message = String.format("Title: %s, Diff: %s", m.group(1), m.group(2));
+                    String message = String.format("Title: %s, Diff: %s",
+                            m.group(1), m.group(2));
                     pubsubMessage.encodeData(message.getBytes("UTF-8"));
                 } else {
                     pubsubMessage.encodeData(line.getBytes("UTF-8"));
@@ -208,9 +228,11 @@ public class Main {
         }
     }
 
-    public static void pullMessages(Pubsub client, String[] args) throws IOException {
+    public static void pullMessages(Pubsub client, String[] args)
+            throws IOException {
         checkArgsLength(args, 3);
-        String subscriptionName = Utils.fqrn(Utils.ResourceType.SUBSCRIPTION, args[0], args[2]);
+        String subscriptionName = Utils.getFullyQualifiedResourceName(
+                Utils.ResourceType.SUBSCRIPTION, args[0], args[2]);
         PullRequest pullRequest = new PullRequest();
         pullRequest.setSubscription(subscriptionName);
         pullRequest.setReturnImmediately(false);
@@ -218,7 +240,8 @@ public class Main {
         while (true) {
             PullResponse pullResponse;
             try {
-                pullResponse = client.subscriptions().pull(pullRequest).execute();
+                pullResponse =
+                        client.subscriptions().pull(pullRequest).execute();
             } catch (Exception e) {
                 // Something went wrong; wait a bit then try again.
                 try {
@@ -228,9 +251,11 @@ public class Main {
                 }
                 continue;
             }
-            PubsubMessage pubsubMessage = pullResponse.getPubsubEvent().getMessage();
+            PubsubMessage pubsubMessage =
+                    pullResponse.getPubsubEvent().getMessage();
             if (pubsubMessage != null) {
-                System.out.println(new String(pubsubMessage.decodeData(), "UTF-8"));
+                System.out.println(
+                        new String(pubsubMessage.decodeData(), "UTF-8"));
                 String id = pullResponse.getAckId();
                 AcknowledgeRequest ackRequest = new AcknowledgeRequest();
                 List<String> ackIds = new ArrayList<>(1);
@@ -246,7 +271,8 @@ public class Main {
         CommandLine cmd = parser.parse(options, args);
         String[] cmdArgs = cmd.getArgs();
         checkArgsLength(cmdArgs, 2);
-        Pubsub client = Utils.getClient(cmd.hasOption("noauth_local_webserver"));
+        Pubsub client =
+                Utils.getClient(cmd.hasOption("noauth_local_webserver"));
 
         switch (cmdArgs[1]) {
             case "list_topics":

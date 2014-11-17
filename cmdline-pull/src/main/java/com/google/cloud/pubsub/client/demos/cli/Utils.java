@@ -1,11 +1,13 @@
 package com.google.cloud.pubsub.client.demos.cli;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.java6.auth.oauth2
+        .AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.extensions.java6.auth.oauth2.GooglePromptReceiver;
+import com.google.api.client.googleapis.extensions.java6.auth.oauth2
+        .GooglePromptReceiver;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -33,7 +35,8 @@ public class Utils {
 
     private static HttpTransport httpTransport;
 
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final JsonFactory JSON_FACTORY =
+            JacksonFactory.getDefaultInstance();
 
     /**
      * Enum representing a resource type.
@@ -52,13 +55,17 @@ public class Utils {
      * @param resource topic name or subscription name
      * @return A string in a form of PROJECT_NAME/RESOURCE_NAME
      */
-    public static String fqrn(ResourceType resourceType, String project, String resource) {
-        return String.format("/%s/%s/%s", resourceType.collectionName, project, resource);
+    public static String getFullyQualifiedResourceName(
+            ResourceType resourceType, String project, String resource) {
+        return String.format("/%s/%s/%s",
+                resourceType.collectionName, project, resource);
     }
 
-    private static Credential authorize(boolean noAuthLocalWebServer) throws Exception {
+    private static Credential authorize(boolean noAuthLocalWebServer)
+            throws Exception {
         // load client secrets
-        InputStream inputStream = Utils.class.getResourceAsStream("/client_secrets.json");
+        InputStream inputStream =
+                Utils.class.getResourceAsStream("/client_secrets.json");
         if (inputStream == null) {
             System.err.println("Download a json file containing "
                                + "Client ID and Secret from "
@@ -69,10 +76,12 @@ public class Utils {
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(
             JSON_FACTORY, new InputStreamReader(inputStream));
         // set up authorization code flow
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-            httpTransport, JSON_FACTORY, clientSecrets, PubsubScopes.all())
-            .setDataStoreFactory(datastoreFactory)
-            .build();
+        GoogleAuthorizationCodeFlow flow =
+                new GoogleAuthorizationCodeFlow.Builder(
+                        httpTransport, JSON_FACTORY, clientSecrets,
+                        PubsubScopes.all())
+                        .setDataStoreFactory(datastoreFactory)
+                        .build();
         // authorize
         if (noAuthLocalWebServer) {
             return new AuthorizationCodeInstalledApp(
@@ -89,7 +98,8 @@ public class Utils {
      * @return Pubsub client.
      * @throws IOException when we can not load the private key file.
      */
-    public static Pubsub getClient(boolean noAuthLocalWebServer) throws Exception {
+    public static Pubsub getClient(boolean noAuthLocalWebServer)
+            throws Exception {
         datastoreFactory = new FileDataStoreFactory(CREDENTIALS_DIR);
         httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         Credential credential = authorize(noAuthLocalWebServer);
