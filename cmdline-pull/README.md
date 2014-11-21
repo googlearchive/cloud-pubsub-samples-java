@@ -19,9 +19,13 @@ Install Maven and Java7.
 
 - Enable the "Google Cloud Pub/Sub" API under "APIs & auth > APIs."
 
-- Go to "Credentials" and create a new Client ID by selecting
-  "Installed application" and "Other". Then click the "Download JSON"
-  button and save it as "src/main/resources/client_secrets.json".
+- Go to "Credentials" and create a new Service Account,
+  then download a new P12 key.
+
+- Set the following environment variables.
+
+  - SERVICE_ACCOUNT_EMAIL: The e-mail address of your service account.
+  - P12_PATH: The path of your p12 key file.
 
 ## Build the application
 
@@ -52,6 +56,9 @@ $ bin/pubsub-sample.sh MYPROJ list_topics
 
 # create a new subscription "sub" on the "test" topic
 $ bin/pubsub-sample.sh MYPROJ create_subscription sub test
+
+# publish a message "hello" to the "test" topic
+$ bin/pubsub-sample.sh MYPROJ publish_message test hello
 
 # connect to the Wikipedia recent change channel
 $ bin/pubsub-sample.sh \

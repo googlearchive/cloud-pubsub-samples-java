@@ -1,52 +1,96 @@
 package com.google.cloud.pubsub.client.demos.cli;
 
 import com.google.api.services.pubsub.Pubsub;
-import com.google.api.services.pubsub.model.AcknowledgeRequest;
-import com.google.api.services.pubsub.model.ListSubscriptionsResponse;
-import com.google.api.services.pubsub.model.ListTopicsResponse;
-import com.google.api.services.pubsub.model.PublishRequest;
-import com.google.api.services.pubsub.model.PubsubMessage;
-import com.google.api.services.pubsub.model.PullRequest;
-import com.google.api.services.pubsub.model.PullResponse;
-import com.google.api.services.pubsub.model.Subscription;
-import com.google.api.services.pubsub.model.Topic;
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Main class for the Cloud Pub/Sub command line sample application.
  */
 public class Main {
 
-    private static final String BOTNAME = "pubsub-irc-bot/1.0";
+    static final int BATCH_SIZE = 10;
 
-    private static final int PORT = 6667;
+    private static final String SERVICE_ACCOUNT_EMAIL_ENV_NAME =
+            "SERVICE_ACCOUNT_EMAIL";
+
+    private static final String P12_PATH_ENV_NAME = "P12_PATH";
+
+    static final String LOOP_ENV_NAME = "LOOP";
 
     private static Options options;
 
     static {
         options = new Options();
-        options.addOption("noauth_local_webserver", false,
-                "do not use a local webserver for authentication");
+        options.addOption("p", "p12_path", true,
+                "Path to a secret file of your Service Account");
+        options.addOption("e", "service_account_email", true,
+                "The e-mail address of your Service Account");
+        options.addOption("l", "loop", false,
+                "Loop forever for pulling when specified");
 
     }
 
-    private static void checkArgsLength(String[] args, int min) {
+    /**
+     * Enum representing subcommands.
+     */
+    private enum CmdLineOperation {
+        create_topic {
+            @Override
+            void run(Pubsub client, String[] args) throws IOException {
+                TopicMethods.createTopic(client, args);
+            }
+        }, publish_message {
+            @Override
+            void run(Pubsub client, String[] args) throws IOException {
+                TopicMethods.publishMessage(client, args);
+            }
+        }, connect_irc {
+            @Override
+            void run(Pubsub client, String[] args) throws IOException {
+                TopicMethods.connectIrc(client, args);
+            }
+        }, list_topics {
+            @Override
+            void run(Pubsub client, String[] args) throws IOException {
+                TopicMethods.listTopics(client, args);
+            }
+        }, delete_topic {
+            @Override
+            void run(Pubsub client, String[] args) throws IOException {
+                TopicMethods.deleteTopic(client, args);
+            }
+        }, create_subscription {
+            @Override
+            void run(Pubsub client, String[] args) throws IOException {
+                SubscriptionMethods.createSubscription(client, args);
+            }
+        }, pull_messages {
+            @Override
+            void run(Pubsub client, String[] args) throws IOException {
+                SubscriptionMethods.pullMessages(client, args);
+            }
+        }, list_subscriptions {
+            @Override
+            void run(Pubsub client, String[] args) throws IOException {
+                SubscriptionMethods.listSubscriptions(client, args);
+            }
+        }, delete_subscription {
+            @Override
+            void run(Pubsub client, String[] args) throws IOException {
+                SubscriptionMethods.deleteSubscription(client, args);
+            }
+        };
+        abstract void run(Pubsub client, String[] args) throws IOException;
+    }
+
+    static void checkArgsLength(String[] args, int min) {
         if (args.length < min) {
             help();
             System.exit(1);
@@ -66,204 +110,10 @@ public class Main {
                         + "PROJ create_subscription SUBSCRIPTION LINKED_TOPIC\n"
                         + "PROJ delete_subscription SUBSCRIPTION\n"
                         + "PROJ connect_irc TOPIC SERVER CHANNEL\n"
+                        + "PROJ publish_message TOPIC MESSAGE\n"
                         + "PROJ pull_messages SUBSCRIPTION\n"
         );
         writer.close();
-    }
-
-    public static void listTopics(Pubsub client, String[] args)
-            throws IOException {
-        Pubsub.Topics.List list = client.topics().list().setQuery(
-                String.format("cloud.googleapis.com/project in (/projects/%s)",
-                        args[0]));
-        String nextPageToken = null;
-        boolean topicPrinted = false;
-        do {
-            if (nextPageToken != null) {
-                list.setPageToken(nextPageToken);
-            }
-            ListTopicsResponse response = list.execute();
-            if (!response.isEmpty()) {
-                for (Topic topic : response.getTopic()) {
-                    topicPrinted = true;
-                    System.out.println(topic.getName());
-                }
-            }
-            nextPageToken = response.getNextPageToken();
-        } while (nextPageToken != null);
-        if (!topicPrinted) {
-            System.out.println(String.format(
-                    "There is no topic in the project '%s'.", args[0]));
-        }
-    }
-
-    public static void listSubscriptions(Pubsub client, String[] args)
-            throws IOException {
-        Pubsub.Subscriptions.List list = client.subscriptions().list().setQuery(
-                String.format("cloud.googleapis.com/project in (/projects/%s)",
-                        args[0]));
-        String nextPageToken = null;
-        boolean subscriptionPrinted = false;
-        do {
-            if (nextPageToken != null) {
-                list.setPageToken(nextPageToken);
-            }
-            ListSubscriptionsResponse response = list.execute();
-            if (!response.isEmpty()) {
-                for (Subscription subscription : response.getSubscription()) {
-                    subscriptionPrinted = true;
-                    System.out.println(subscription.toPrettyString());
-                }
-            }
-            nextPageToken = response.getNextPageToken();
-        } while (nextPageToken != null);
-        if (!subscriptionPrinted) {
-            System.out.println(String.format(
-                    "There is no subscription in the project '%s'.", args[0]));
-        }
-    }
-
-    public static void createTopic(Pubsub client, String[] args)
-            throws IOException {
-        checkArgsLength(args, 3);
-        Topic topic = new Topic().setName(
-                Utils.getFullyQualifiedResourceName(Utils.ResourceType.TOPIC,
-                        args[0], args[2]));
-        topic = client.topics().create(topic).execute();
-        System.out.printf("Topic %s was created.\n", topic.getName());
-    }
-
-    public static void deleteTopic(Pubsub client, String[] args)
-            throws IOException {
-        checkArgsLength(args, 3);
-        String topicName = Utils.getFullyQualifiedResourceName(
-                Utils.ResourceType.TOPIC, args[0], args[2]);
-        client.topics().delete(topicName).execute();
-        System.out.printf("Topic %s was deleted.\n", topicName);
-    }
-
-    public static void createSubscription(Pubsub client, String[] args)
-            throws IOException {
-        checkArgsLength(args, 4);
-        Subscription subscription = new Subscription()
-                .setTopic(Utils.getFullyQualifiedResourceName(
-                        Utils.ResourceType.TOPIC, args[0], args[3]))
-                .setName(Utils.getFullyQualifiedResourceName(
-                        Utils.ResourceType.SUBSCRIPTION, args[0], args[2]));
-        subscription = client.subscriptions().create(subscription).execute();
-        System.out.printf(
-                "Subscription %s was created.\n", subscription.getName());
-        System.out.println(subscription.toPrettyString());
-    }
-
-    public static void deleteSubscription(Pubsub client, String[] args)
-            throws IOException {
-        checkArgsLength(args, 3);
-        String subscriptionName = Utils.getFullyQualifiedResourceName(
-                Utils.ResourceType.SUBSCRIPTION, args[0], args[2]);
-        client.subscriptions().delete(subscriptionName).execute();
-        System.out.printf("Subscription %s was deleted.\n", subscriptionName);
-    }
-
-    public static void connectIrc(Pubsub client, String[] args)
-            throws IOException {
-        checkArgsLength(args, 5);
-        String server = args[3];
-        String channel = args[4];
-        String topic = Utils.getFullyQualifiedResourceName(
-                Utils.ResourceType.TOPIC, args[0], args[2]);
-        String nick = String.format("bot-%s", args[0]);
-        Socket socket = new Socket(server, PORT);
-        BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(socket.getOutputStream()));
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(socket.getInputStream()));
-
-        writer.write(String.format("NICK %s\r\n", nick));
-        writer.write(String.format("USER %s 8 * : %s\r\n", nick, BOTNAME));
-        writer.flush();
-
-        String line;
-        while ((line = reader.readLine()) != null) {
-            if (line.contains("004")) {
-                System.out.printf("Connected to %s.\n", server);
-                break;
-            } else if (line.contains("433")) {
-                System.err.println("Nickname is already in use.");
-                return;
-            }
-        }
-
-        writer.write(String.format("JOIN %s\r\n", channel));
-        writer.flush();
-
-        // A regex pattern for Wikipedia change log as of June 4, 2014
-        Pattern p = Pattern.compile(
-            "\\u000314\\[\\[\\u000307(.*)\\u000314\\]\\]\\u0003.*"
-                    + "\\u000302(http://[^\\u0003]*)\\u0003");
-        while ((line = reader.readLine()) != null) {
-            if (line.toLowerCase().startsWith("PING ")) {
-                // We must respond to PINGs to avoid being disconnected.
-                writer.write("PONG " + line.substring(5) + "\r\n");
-                writer.write("PRIVMSG " + channel + " :I got pinged!\r\n");
-                writer.flush();
-            } else {
-                String privmsgMark = "PRIVMSG " + channel + " :";
-                int i = line.indexOf(privmsgMark);
-                if (i == -1) { continue; }
-                line = line.substring(i + privmsgMark.length(), line.length());
-                PubsubMessage pubsubMessage = new PubsubMessage();
-                Matcher m = p.matcher(line);
-                if (m.find()) {
-                    String message = String.format("Title: %s, Diff: %s",
-                            m.group(1), m.group(2));
-                    pubsubMessage.encodeData(message.getBytes("UTF-8"));
-                } else {
-                    pubsubMessage.encodeData(line.getBytes("UTF-8"));
-                }
-                PublishRequest publishRequest = new PublishRequest();
-                publishRequest.setTopic(topic).setMessage(pubsubMessage);
-                client.topics().publish(publishRequest).execute();
-            }
-        }
-    }
-
-    public static void pullMessages(Pubsub client, String[] args)
-            throws IOException {
-        checkArgsLength(args, 3);
-        String subscriptionName = Utils.getFullyQualifiedResourceName(
-                Utils.ResourceType.SUBSCRIPTION, args[0], args[2]);
-        PullRequest pullRequest = new PullRequest();
-        pullRequest.setSubscription(subscriptionName);
-        pullRequest.setReturnImmediately(false);
-
-        while (true) {
-            PullResponse pullResponse;
-            try {
-                pullResponse =
-                        client.subscriptions().pull(pullRequest).execute();
-            } catch (Exception e) {
-                // Something went wrong; wait a bit then try again.
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ie) {
-                    System.exit(1);
-                }
-                continue;
-            }
-            PubsubMessage pubsubMessage =
-                    pullResponse.getPubsubEvent().getMessage();
-            if (pubsubMessage != null) {
-                System.out.println(
-                        new String(pubsubMessage.decodeData(), "UTF-8"));
-                String id = pullResponse.getAckId();
-                AcknowledgeRequest ackRequest = new AcknowledgeRequest();
-                List<String> ackIds = new ArrayList<>(1);
-                ackIds.add(id);
-                ackRequest.setSubscription(subscriptionName).setAckId(ackIds);
-                client.subscriptions().acknowledge(ackRequest).execute();
-            }
-        }
     }
 
     public static void main(String[] args) throws Exception {
@@ -271,37 +121,29 @@ public class Main {
         CommandLine cmd = parser.parse(options, args);
         String[] cmdArgs = cmd.getArgs();
         checkArgsLength(cmdArgs, 2);
-        Pubsub client =
-                Utils.getClient(cmd.hasOption("noauth_local_webserver"));
-
-        switch (cmdArgs[1]) {
-            case "list_topics":
-                listTopics(client, cmdArgs);
-                break;
-            case "create_topic":
-                createTopic(client, cmdArgs);
-                break;
-            case "delete_topic":
-                deleteTopic(client, cmdArgs);
-                break;
-            case "list_subscriptions":
-                listSubscriptions(client, cmdArgs);
-                break;
-            case "create_subscription":
-                createSubscription(client, cmdArgs);
-                break;
-            case "delete_subscription":
-                deleteSubscription(client, cmdArgs);
-                break;
-            case "connect_irc":
-                connectIrc(client, cmdArgs);
-                break;
-            case "pull_messages":
-                pullMessages(client, cmdArgs);
-                break;
-            default:
-                help();
-                System.exit(1);
+        String serviceAccountEmail = System.getenv(
+                SERVICE_ACCOUNT_EMAIL_ENV_NAME);
+        String p12Path = System.getenv(P12_PATH_ENV_NAME);
+        if (cmd.hasOption("service_account_email")) {
+            serviceAccountEmail = cmd.getOptionValue("service_account_email");
+        }
+        if (cmd.hasOption("p12_path")) {
+            p12Path = cmd.getOptionValue("p12_path");
+        }
+        if (cmd.hasOption("loop")) {
+            System.setProperty(LOOP_ENV_NAME, "loop");
+        }
+        Pubsub client = Utils.getClient(serviceAccountEmail, p12Path);
+        try {
+            CmdLineOperation cmdLineOperation =
+                    CmdLineOperation.valueOf(cmdArgs[1]);
+            cmdLineOperation.run(client, cmdArgs);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } catch (IllegalArgumentException e) {
+            help();
+            System.exit(1);
         }
     }
 }
