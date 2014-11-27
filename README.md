@@ -1,6 +1,6 @@
 # Cloud Pub/Sub samples for Java
 
-This repository contains several samples for Cloud Pub/Sub service
+This repository contains several samples for [Cloud Pub/Sub service](https://cloud.google.com/pubsub/)
 with Java.
 
 - appengine-push
@@ -11,4 +11,4 @@ with Java.
 
   A command line sample for pull subscription.
 
-[1]: https://developers.google.com/appengine/
+[1]: https://cloud.google.com/appengine/docs
