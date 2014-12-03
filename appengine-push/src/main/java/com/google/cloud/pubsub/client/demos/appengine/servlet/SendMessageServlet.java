@@ -17,9 +17,11 @@
 package com.google.cloud.pubsub.client.demos.appengine.servlet;
 
 import com.google.api.services.pubsub.Pubsub;
+import com.google.api.services.pubsub.model.PublishBatchRequest;
 import com.google.api.services.pubsub.model.PublishRequest;
 import com.google.api.services.pubsub.model.PubsubMessage;
 import com.google.cloud.pubsub.client.demos.appengine.util.PubsubUtils;
+import com.google.common.collect.ImmutableList;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -42,11 +44,11 @@ public class SendMessageServlet extends HttpServlet {
                     PubsubUtils.getAppTopicName());
             PubsubMessage pubsubMessage = new PubsubMessage();
             pubsubMessage.encodeData(message.getBytes("UTF-8"));
-            PublishRequest publishRequest = new PublishRequest();
-            publishRequest.setTopic(fullTopicName);
-            publishRequest.setMessage(pubsubMessage);
+            PublishBatchRequest publishBatchRequest = new PublishBatchRequest();
+            publishBatchRequest.setTopic(fullTopicName);
+            publishBatchRequest.setMessages(ImmutableList.of(pubsubMessage));
 
-            client.topics().publish(publishRequest).execute();
+            client.topics().publishBatch(publishBatchRequest).execute();
         }
         resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         resp.getWriter().close();
