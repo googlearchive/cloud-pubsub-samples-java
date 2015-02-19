@@ -2,8 +2,8 @@ package com.google.cloud.pubsub.client.demos.cli;
 
 import com.google.api.services.pubsub.Pubsub;
 import com.google.api.services.pubsub.model.ListTopicsResponse;
-import com.google.api.services.pubsub.model.PublishBatchRequest;
-import com.google.api.services.pubsub.model.PublishBatchResponse;
+import com.google.api.services.pubsub.model.PublishRequest;
+import com.google.api.services.pubsub.model.PublishResponse;
 import com.google.api.services.pubsub.model.PubsubMessage;
 import com.google.api.services.pubsub.model.Topic;
 import com.google.common.collect.ImmutableList;
@@ -24,16 +24,16 @@ import java.util.regex.Pattern;
 public class TopicMethods {
 
     private static final String BOT_NAME = "pubsub-irc-bot/1.0";
-
     private static final int PORT = 6667;
 
     public static void createTopic(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);
-        Topic topic = new Topic().setName(
-                Utils.getFullyQualifiedResourceName(Utils.ResourceType.TOPIC,
-                        args[0], args[2]));
-        topic = client.topics().create(topic).execute();
+        String topicName = Utils.getFullyQualifiedResourceName(
+                Utils.ResourceType.TOPIC, args[0], args[2]);
+        Topic topic = client.projects().topics()
+                .create(topicName, new Topic())
+                .execute();
         System.out.printf("Topic %s was created.\n", topic.getName());
     }
 
@@ -82,7 +82,9 @@ public class TopicMethods {
             } else {
                 String privmsgMark = "PRIVMSG " + channel + " :";
                 int i = line.indexOf(privmsgMark);
-                if (i == -1) { continue; }
+                if (i == -1) {
+                    continue;
+                }
                 line = line.substring(i + privmsgMark.length(), line.length());
                 PubsubMessage pubsubMessage = new PubsubMessage();
                 Matcher m = p.matcher(line);
@@ -94,10 +96,11 @@ public class TopicMethods {
                     pubsubMessage.encodeData(line.getBytes("UTF-8"));
                 }
                 List<PubsubMessage> messages = ImmutableList.of(pubsubMessage);
-                PublishBatchRequest publishBatchRequest =
-                        new PublishBatchRequest();
-                publishBatchRequest.setTopic(topic).setMessages(messages);
-                client.topics().publishBatch(publishBatchRequest).execute();
+                PublishRequest publishRequest = new PublishRequest();
+                publishRequest.setMessages(messages);
+                client.projects().topics()
+                        .publish(topic, publishRequest)
+                        .execute();
             }
         }
     }
@@ -111,12 +114,12 @@ public class TopicMethods {
         PubsubMessage pubsubMessage = new PubsubMessage()
                 .encodeData(message.getBytes("UTF-8"));
         List<PubsubMessage> messages = ImmutableList.of(pubsubMessage);
-        PublishBatchRequest publishBatchRequest =
-                new PublishBatchRequest();
-        publishBatchRequest.setTopic(topic).setMessages(messages);
-        PublishBatchResponse publishBatchResponse =
-                client.topics().publishBatch(publishBatchRequest).execute();
-        List<String> messageIds = publishBatchResponse.getMessageIds();
+        PublishRequest publishRequest = new PublishRequest();
+        publishRequest.setMessages(messages);
+        PublishResponse publishResponse = client.projects().topics()
+                .publish(topic, publishRequest)
+                .execute();
+        List<String> messageIds = publishResponse.getMessageIds();
         if (messageIds != null) {
             for (String messageId : messageIds) {
                 System.out.println("Published with a message id: " + messageId);
@@ -129,24 +132,23 @@ public class TopicMethods {
         Main.checkArgsLength(args, 3);
         String topicName = Utils.getFullyQualifiedResourceName(
                 Utils.ResourceType.TOPIC, args[0], args[2]);
-        client.topics().delete(topicName).execute();
+        client.projects().topics().delete(topicName).execute();
         System.out.printf("Topic %s was deleted.\n", topicName);
     }
 
     public static void listTopics(Pubsub client, String[] args)
             throws IOException {
-        Pubsub.Topics.List list = client.topics().list().setQuery(
-                String.format("cloud.googleapis.com/project in (/projects/%s)",
-                        args[0]));
         String nextPageToken = null;
         boolean hasTopics = false;
+        Pubsub.Projects.Topics.List listMethod =
+                client.projects().topics().list("projects/" + args[0]);
         do {
             if (nextPageToken != null) {
-                list.setPageToken(nextPageToken);
+                listMethod.setPageToken(nextPageToken);
             }
-            ListTopicsResponse response = list.execute();
+            ListTopicsResponse response = listMethod.execute();
             if (!response.isEmpty()) {
-                for (Topic topic : response.getTopic()) {
+                for (Topic topic : response.getTopics()) {
                     hasTopics = true;
                     System.out.println(topic.getName());
                 }

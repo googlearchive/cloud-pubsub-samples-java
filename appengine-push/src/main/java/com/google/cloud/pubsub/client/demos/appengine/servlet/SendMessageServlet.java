@@ -17,7 +17,6 @@
 package com.google.cloud.pubsub.client.demos.appengine.servlet;
 
 import com.google.api.services.pubsub.Pubsub;
-import com.google.api.services.pubsub.model.PublishBatchRequest;
 import com.google.api.services.pubsub.model.PublishRequest;
 import com.google.api.services.pubsub.model.PubsubMessage;
 import com.google.cloud.pubsub.client.demos.appengine.util.PubsubUtils;
@@ -39,16 +38,17 @@ public class SendMessageServlet extends HttpServlet {
         Pubsub client = PubsubUtils.getClient();
         String message = req.getParameter("message");
         if (!"".equals(message)) {
-            String fullTopicName = String.format("/topics/%s/%s",
+            String fullTopicName = String.format("projects/%s/topics/%s",
                     PubsubUtils.getProjectId(),
                     PubsubUtils.getAppTopicName());
             PubsubMessage pubsubMessage = new PubsubMessage();
             pubsubMessage.encodeData(message.getBytes("UTF-8"));
-            PublishBatchRequest publishBatchRequest = new PublishBatchRequest();
-            publishBatchRequest.setTopic(fullTopicName);
-            publishBatchRequest.setMessages(ImmutableList.of(pubsubMessage));
+            PublishRequest publishRequest = new PublishRequest();
+            publishRequest.setMessages(ImmutableList.of(pubsubMessage));
 
-            client.topics().publishBatch(publishBatchRequest).execute();
+            client.projects().topics()
+                    .publish(fullTopicName, publishRequest)
+                    .execute();
         }
         resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         resp.getWriter().close();

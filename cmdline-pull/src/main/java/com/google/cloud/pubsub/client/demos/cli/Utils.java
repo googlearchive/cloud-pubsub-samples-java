@@ -42,8 +42,8 @@ public class Utils {
      */
     public static String getFullyQualifiedResourceName(
             ResourceType resourceType, String project, String resource) {
-        return String.format("/%s/%s/%s",
-                resourceType.collectionName, project, resource);
+        return String.format("projects/%s/%s/%s",
+                project, resourceType.collectionName, resource);
     }
 
     /**

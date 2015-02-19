@@ -60,17 +60,18 @@ public class InitServlet extends HttpServlet {
 
     private final void setupTopic(Pubsub client)
             throws IOException {
-        String fullName = String.format("/topics/%s/%s",
+        String fullName = String.format("projects/%s/topics/%s",
                 PubsubUtils.getProjectId(),
                 PubsubUtils.getAppTopicName());
 
         try {
-            client.topics().get(fullName).execute();
+            client.projects().topics().get(fullName).execute();
         } catch (GoogleJsonResponseException e) {
             if (e.getStatusCode() == 404) {
                 // Create the topic if it doesn't exist
-                Topic topic = new Topic().setName(fullName);
-                client.topics().create(topic).execute();
+                client.projects().topics()
+                        .create(fullName, new Topic())
+                        .execute();
             } else {
                 throw e;
             }
@@ -79,25 +80,26 @@ public class InitServlet extends HttpServlet {
 
     private final void setupSubscription(Pubsub client)
             throws IOException {
-        String fullName = String.format("/subscriptions/%s/%s",
+        String fullName = String.format("projects/%s/subscriptions/%s",
                 PubsubUtils.getProjectId(),
                 PubsubUtils.getAppSubscriptionName());
 
         try {
-            client.subscriptions().get(fullName).execute();
+            client.projects().subscriptions().get(fullName).execute();
         } catch (GoogleJsonResponseException e) {
             if (e.getStatusCode() == 404) {
                 // Create the subscription if it doesn't exist
-                String fullTopicName = String.format("/topics/%s/%s",
+                String fullTopicName = String.format("projects/%s/topics/%s",
                         PubsubUtils.getProjectId(),
                         PubsubUtils.getAppTopicName());
                 PushConfig pushConfig = new PushConfig()
                         .setPushEndpoint(PubsubUtils.getAppEndpointUrl());
                 Subscription subscription = new Subscription()
                         .setTopic(fullTopicName)
-                        .setName(fullName)
                         .setPushConfig(pushConfig);
-                client.subscriptions().create(subscription).execute();
+                client.projects().subscriptions()
+                        .create(fullName, subscription)
+                        .execute();
             } else {
                 throw e;
             }
