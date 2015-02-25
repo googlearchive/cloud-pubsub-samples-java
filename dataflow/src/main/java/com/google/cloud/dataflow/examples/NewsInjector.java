@@ -205,11 +205,10 @@ public class NewsInjector {
     PubsubMessage pubsubMessage = new PubsubMessage();
     pubsubMessage.encodeData(message.getBytes());
 
-    PublishRequest publishRequest =
-      new PublishRequest().setMessages(ImmutableList.of(pubsubMessage));
+    PublishRequest publishRequest = new PublishRequest();
+    publishRequest.setTopic(outputTopic).setMessage(pubsubMessage);
     try {
-      this.pubsub.projects().topics().publish(outputTopic, publishRequest)
-        .execute();
+      this.pubsub.topics().publish(publishRequest).execute();
     } catch (java.io.IOException e) {
     }
   }

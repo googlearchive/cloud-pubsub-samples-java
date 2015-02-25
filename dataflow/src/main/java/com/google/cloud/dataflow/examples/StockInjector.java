@@ -197,20 +197,12 @@ public class StockInjector {
     PubsubMessage pubsubMessage = new PubsubMessage();
     pubsubMessage.encodeData(message.getBytes());
 
-    PublishRequest publishRequest =
-      new PublishRequest().setMessages(ImmutableList.of(pubsubMessage));
+    PublishRequest publishRequest = new PublishRequest();
+    publishRequest.setTopic(outputTopic).setMessage(pubsubMessage);
     try {
-      this.pubsub.projects().topics().publish(this.stockTopic, publishRequest)
-        .execute();
+      this.pubsub.topics().publish(publishRequest).execute();
     } catch (java.io.IOException e) {
     }
-
-    // PublishRequest publishRequest = new PublishRequest();
-    // publishRequest.setTopic(outputTopic).setMessage(pubsubMessage);
-    // try {
-    //   this.pubsub.topics().publish(publishRequest).execute();
-    // } catch (java.io.IOException e) {
-    // }
   }
 
   public String getContent(String pageURL, String catPhrase) {

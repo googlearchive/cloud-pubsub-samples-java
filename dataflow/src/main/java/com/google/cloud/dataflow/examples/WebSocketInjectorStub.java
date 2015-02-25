@@ -220,17 +220,17 @@ public class WebSocketInjectorStub {
     }
     */
     /**/
-    final PublishRequest publishRequest =
-      new PublishRequest().setMessages(ImmutableList.of(pubsubMessage));
+    final PublishRequest publishRequest = new PublishRequest();
+
+    publishRequest.setTopic(outputTopic).setMessage(pubsubMessage);
+    // pubsub.topics().publish(publishRequest).execute();
 
     for (int i = 0; i < 20; ++i) {
       // publish on a new thread.
       Thread thread = new Thread(new Runnable() {
           public void run() {
             try {
-              pubsub.projects().topics().publish(outputTopic, publishRequest)
-                .execute();
-              // pubsub.topics().publish(publishRequest).execute();
+              pubsub.topics().publish(publishRequest).execute();
             } catch (java.io.IOException e) {
             }
 
