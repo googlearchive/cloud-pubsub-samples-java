@@ -102,13 +102,19 @@
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-api-1.0-sdk</artifactId>
-      <version>1.9.17</version>
+      <version>1.9.18</version>
+    </dependency>
+
+    <dependency>
+       <groupId>com.google.apis</groupId>
+       <artifactId>google-api-services-pubsub</artifactId>
+       <version>v1beta2-rev1-1.19.1</version>
     </dependency>
 
     <dependency>
       <groupId>com.google.api-client</groupId>
       <artifactId>google-api-client</artifactId>
-      <version>1.19.1</version>
+      <version>1.19.0</version>
     </dependency>
 
     <dependency>
