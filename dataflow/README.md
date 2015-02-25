@@ -37,12 +37,13 @@ $ java -cp target/examples-1.jar com.google.cloud.dataflow.examples.WebSocketInj
 
 ### To run an example pipeline:
 
-Choose one or more of the following to run the corresponding injector:
+Download the dataflow-streaming SDK, and copy the pipeline example to
+cloud-dataflow/src/main/java/com/google/cloud/dataflow/examples/ directory in the SDK.
+
+Compile the SDK:
 
 ```
-$ java -cp target/examples-1.jar com.google.cloud.dataflow.examples.StockInjector /topics/$PROJECT/$TOPIC
-$ java -cp target/examples-1.jar com.google.cloud.dataflow.examples.NewsInjector /topics/$PROJECT/$TOPIC
-$ java -cp target/examples-1.jar com.google.cloud.dataflow.examples.WebSocketInjectorStub /topics/$PROJECT/$TOPIC
-
+$ mvn clean compile bundle:bundle
 ```
+
 
