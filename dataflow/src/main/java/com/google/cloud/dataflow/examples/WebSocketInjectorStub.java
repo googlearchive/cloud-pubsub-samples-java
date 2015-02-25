@@ -27,7 +27,6 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpUnsuccessfulResponseHandler;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.client.util.Sleeper;
-import com.google.common.base.Preconditions;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
@@ -38,6 +37,9 @@ import com.google.api.services.pubsub.Pubsub;
 import com.google.api.services.pubsub.PubsubScopes;
 import com.google.api.services.pubsub.model.PublishRequest;
 import com.google.api.services.pubsub.model.PubsubMessage;
+
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 // Imports for using WebSockets.
 import org.glassfish.tyrus.client.ClientManager;
@@ -218,17 +220,17 @@ public class WebSocketInjectorStub {
     }
     */
     /**/
-    final PublishRequest publishRequest = new PublishRequest();
-
-    publishRequest.setTopic(outputTopic).setMessage(pubsubMessage);
-    // pubsub.topics().publish(publishRequest).execute();
+    final PublishRequest publishRequest =
+      new PublishRequest().setMessages(ImmutableList.of(pubsubMessage));
 
     for (int i = 0; i < 20; ++i) {
       // publish on a new thread.
       Thread thread = new Thread(new Runnable() {
           public void run() {
             try {
-              pubsub.topics().publish(publishRequest).execute();
+              pubsub.projects().topics().publish(outputTopic, publishRequest)
+                .execute();
+              // pubsub.topics().publish(publishRequest).execute();
             } catch (java.io.IOException e) {
             }
 

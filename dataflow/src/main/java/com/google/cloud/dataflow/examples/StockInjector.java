@@ -26,7 +26,6 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpUnsuccessfulResponseHandler;
 import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.client.util.Sleeper;
-import com.google.common.base.Preconditions;
 
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
@@ -38,6 +37,8 @@ import com.google.api.services.pubsub.PubsubScopes;
 import com.google.api.services.pubsub.model.PublishRequest;
 import com.google.api.services.pubsub.model.PubsubMessage;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 import org.joda.time.Duration;
 import java.io.IOException;
@@ -196,12 +197,20 @@ public class StockInjector {
     PubsubMessage pubsubMessage = new PubsubMessage();
     pubsubMessage.encodeData(message.getBytes());
 
-    PublishRequest publishRequest = new PublishRequest();
-    publishRequest.setTopic(outputTopic).setMessage(pubsubMessage);
+    PublishRequest publishRequest =
+      new PublishRequest().setMessages(ImmutableList.of(pubsubMessage));
     try {
-      this.pubsub.topics().publish(publishRequest).execute();
+      this.pubsub.projects().topics().publish(this.stockTopic, publishRequest)
+        .execute();
     } catch (java.io.IOException e) {
     }
+
+    // PublishRequest publishRequest = new PublishRequest();
+    // publishRequest.setTopic(outputTopic).setMessage(pubsubMessage);
+    // try {
+    //   this.pubsub.topics().publish(publishRequest).execute();
+    // } catch (java.io.IOException e) {
+    // }
   }
 
   public String getContent(String pageURL, String catPhrase) {
