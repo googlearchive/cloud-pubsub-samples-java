@@ -39,14 +39,6 @@ import com.google.api.services.pubsub.PubsubScopes;
 import com.google.api.services.pubsub.model.PublishRequest;
 import com.google.api.services.pubsub.model.PubsubMessage;
 
-// import com.google.cloud.dataflow.sdk.options.Description;
-// import com.google.cloud.dataflow.sdk.options.PipelineOptions;
-// import com.google.cloud.dataflow.sdk.options.PipelineOptionsFactory;
-// import com.google.cloud.dataflow.sdk.options.StreamingOptions;
-// import com.google.cloud.dataflow.sdk.options.Validation;
-// import com.google.cloud.dataflow.sdk.util.Transport;
-
-
 // Imports for using WebSockets.
 import org.glassfish.tyrus.client.ClientManager;
 import java.io.IOException;
