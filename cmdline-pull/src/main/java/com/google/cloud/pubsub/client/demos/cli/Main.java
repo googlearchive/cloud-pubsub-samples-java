@@ -28,10 +28,6 @@ public class Main {
 
     static {
         options = new Options();
-        options.addOption("p", "p12_path", true,
-                "Path to a secret file of your Service Account");
-        options.addOption("e", "service_account_email", true,
-                "The e-mail address of your Service Account");
         options.addOption("l", "loop", false,
                 "Loop forever for pulling when specified");
 
@@ -121,19 +117,10 @@ public class Main {
         CommandLine cmd = parser.parse(options, args);
         String[] cmdArgs = cmd.getArgs();
         checkArgsLength(cmdArgs, 2);
-        String serviceAccountEmail = System.getenv(
-                SERVICE_ACCOUNT_EMAIL_ENV_NAME);
-        String p12Path = System.getenv(P12_PATH_ENV_NAME);
-        if (cmd.hasOption("service_account_email")) {
-            serviceAccountEmail = cmd.getOptionValue("service_account_email");
-        }
-        if (cmd.hasOption("p12_path")) {
-            p12Path = cmd.getOptionValue("p12_path");
-        }
         if (cmd.hasOption("loop")) {
             System.setProperty(LOOP_ENV_NAME, "loop");
         }
-        Pubsub client = Utils.getClient(serviceAccountEmail, p12Path);
+        Pubsub client = Utils.getClient();
         try {
             CmdLineOperation cmdLineOperation =
                     CmdLineOperation.valueOf(cmdArgs[1]);

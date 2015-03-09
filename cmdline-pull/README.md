@@ -20,12 +20,11 @@ Install Maven and Java7.
 - Enable the "Google Cloud Pub/Sub" API under "APIs & auth > APIs."
 
 - Go to "Credentials" and create a new Service Account,
-  then download a new P12 key.
+  then download a new JSON file.
 
 - Set the following environment variables.
 
-  - SERVICE_ACCOUNT_EMAIL: The e-mail address of your service account.
-  - P12_PATH: The path of your p12 key file.
+  - GOOGLE_APPLICATION_CREDENTIALS: the file path to the downloaded JSON file.
 
 ## Build the application
 
