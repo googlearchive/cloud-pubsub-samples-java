@@ -16,13 +16,12 @@ TODO(tmatsuo): Better implementation for devserver.
   application ID later, so make note of the application ID.
 - Enable the "Google Cloud Pub/Sub" API under "APIs & auth > APIs."
 - For local development, also create a new client ID of type Service
-  account. Save the private key in a secure location and make note of
-  the service account email address.
+  account. Save the JSON file in a secure location.
 
 ## Prerequisites
 
-Install Java 7, and Maven 3.1.0 or higher. You may need to set your
-JAVA_HOME.
+Install Java 7, Google Cloud SDK, and Maven 3.1.0 or higher. You may
+need to set your JAVA_HOME.
 
 ## Configuration
 
@@ -44,7 +43,7 @@ JAVA_HOME.
 You can deploy the application by running:
 
 ```
-$ mvn appengine:update
+$ mvn gcloud:deploy
 ```
 
 If this is the first time you have run "update" on the project, a
@@ -57,21 +56,14 @@ https://{your-application-id}.appspot.com/
 
 ### To run your application locally on a development server:
 
-Edit the appengine-web.xml file with the following 2 changes:
+- Set the following environment variable
 
-- Fill your service account e-mail address in
-  com.google.cloud.pubsub.client.demos.appengine.serviceAccountEmail
-- Provide the path of your p12 private key file in
-  com.google.cloud.pubsub.client.demos.appengine.p12certificatePath
-  Your web application working directory is based on the
-  'src/main/webapp/WEB-INF' folder, so you can just put your p12 file
-  in it and only reference the file in the form of
-  'WEB-INF/{FILENAME}' in the appengine-web.xml.
+  - GOOGLE_APPLICATION_CREDENTIALS: the file path to the downloaded JSON file.
 
 Then start your server by running:
 
 ```
-$ mvn appengine:devserver
+$ mvn gcloud:run
 ```
 
 ## Setup Project in Eclipse
@@ -94,6 +86,6 @@ maven m2e plugin.
 
 ### Run
 - Right-click on project cloud-pubsub-appengine-sample
-- Run As > Maven build -> appengine:devserver
+- Run As > Maven build -> gcloud:run
 
 [1]: http://docs.oracle.com/javase/6/docs/api/java/util/logging/LogManager.html

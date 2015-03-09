@@ -7,15 +7,7 @@
 
   <system-properties>
     <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
-
-    <!-- Uncomment the following two properties to run locally -->
-    <!-- Obtain this from https://cloud.google.com/console/project/your_project/apiui/credential -->
-    <!-- <property name="com.google.cloud.pubsub.client.demos.appengine.serviceAccountEmail" value="{email-address-of-your-service-account}"/> -->
-    <!-- Download this file from https://cloud.google.com/console/project/your_project/apiui/credential -->
-    <!-- <property name="com.google.cloud.pubsub.client.demos.appengine.p12certificatePath" value="{the-path-to-your-p12-file}"/> -->
-
     <!-- Recommended to avoid spoofing. -->
     <property name="com.google.cloud.pubsub.client.demos.appengine.subscriptionUniqueToken" value="{replace-with-a-unique-value}"/>
-
   </system-properties>
 </appengine-web-app>
