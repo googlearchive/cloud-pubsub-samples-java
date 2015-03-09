@@ -9,7 +9,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.pubsub.Pubsub;
 import com.google.api.services.pubsub.PubsubScopes;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -52,16 +51,13 @@ public class Utils {
      * @return Pubsub client.
      * @throws IOException when we can not load the private key file.
      */
-    public static Pubsub getClient(String serviceAccount, String secretFile)
+    public static Pubsub getClient()
             throws IOException, GeneralSecurityException {
         HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
-        GoogleCredential credential = new GoogleCredential.Builder()
-                .setTransport(transport)
-                .setJsonFactory(JSON_FACTORY)
-                .setServiceAccountScopes(PubsubScopes.all())
-                .setServiceAccountId(serviceAccount)
-                .setServiceAccountPrivateKeyFromP12File(new File(secretFile))
-                .build();
+        GoogleCredential credential = GoogleCredential.getApplicationDefault();
+        if (credential.createScopedRequired()) {
+            credential = credential.createScoped(PubsubScopes.all());
+        }
         // Please use custom HttpRequestInitializer for automatic
         // retry upon failures.
         HttpRequestInitializer initializer =
