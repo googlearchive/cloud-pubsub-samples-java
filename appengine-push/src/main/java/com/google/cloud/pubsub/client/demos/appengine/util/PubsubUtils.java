@@ -45,38 +45,18 @@ public final class PubsubUtils {
             "google-cloud-pubsub-appengine-sample/1.0";
 
     public static Pubsub getClient() throws IOException {
-        HttpRequestInitializer credential;
         HttpTransport transport = new UrlFetchTransport();
         JsonFactory jsonFactory = new JacksonFactory();
-
-        String serviceAccountEmail = System.getProperty(
-                Constants.BASE_PACKAGE + ".serviceAccountEmail");
-        String p12CertPath = System.getProperty(
-                Constants.BASE_PACKAGE + ".p12certificatePath");
-
-        if (SystemProperty.environment.value() ==
-                SystemProperty.Environment.Value.Production) {
-            credential = new AppIdentityCredential(PubsubScopes.all());
-        } else {
-            try {
-                credential = new GoogleCredential.Builder()
-                        .setJsonFactory(jsonFactory)
-                        .setTransport(transport)
-                        .setServiceAccountId(serviceAccountEmail)
-                        .setServiceAccountPrivateKeyFromP12File(
-                                new File(p12CertPath))
-                        .setServiceAccountScopes(PubsubScopes.all())
-                        .build();
-            } catch (GeneralSecurityException e) {
-                throw new IOException(
-                        "Unable to generate a credential from a custom "
-                                + "service account configuration.", e);
-            }
+        GoogleCredential credential = GoogleCredential.getApplicationDefault();
+        if (credential.createScopedRequired()) {
+            credential = credential.createScoped(PubsubScopes.all());
         }
-
-        Pubsub client = new Pubsub.Builder(transport, jsonFactory, credential)
+        // Please use custom HttpRequestInitializer for automatic
+        // retry upon failures.
+        HttpRequestInitializer initializer =
+                new RetryHttpInitializerWrapper(credential);
+        Pubsub client = new Pubsub.Builder(transport, jsonFactory, initializer)
                 .setApplicationName(APPLICATION_NAME)
-                .setHttpRequestInitializer(credential)
                 .build();
 
         return client;
