@@ -19,8 +19,9 @@
     <maven>3.1.0</maven>
   </prerequisites>
   <properties>
-    <google-api-client.version>1.19.1</google-api-client.version>
-    <google-api-pubsub.version>v1beta2-rev1-1.19.1</google-api-pubsub.version>
+    <appengine.version>1.9.18</appengine.version>
+    <google-api-client.version>1.20.0</google-api-client.version>
+    <google-api-pubsub.version>v1beta2-rev2-1.20.0</google-api-pubsub.version>
     <webappDirectory>
       ${project.build.directory}/${project.build.finalName}
     </webappDirectory>
@@ -154,16 +155,11 @@
     <dependency>
       <groupId>com.google.appengine</groupId>
       <artifactId>appengine-api-1.0-sdk</artifactId>
-      <version>1.9.17</version>
+      <version>${appengine.version}</version>
     </dependency>
     <dependency>
       <groupId>com.google.api-client</groupId>
       <artifactId>google-api-client-appengine</artifactId>
-      <version>${google-api-client.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.api-client</groupId>
-      <artifactId>google-api-client-jackson2</artifactId>
       <version>${google-api-client.version}</version>
     </dependency>
     <dependency>

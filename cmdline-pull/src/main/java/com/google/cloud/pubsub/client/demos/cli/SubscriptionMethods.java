@@ -21,11 +21,11 @@ public class SubscriptionMethods {
     public static void createSubscription(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 4);
-        String subscriptionName = Utils.getFullyQualifiedResourceName(
-                Utils.ResourceType.SUBSCRIPTION, args[0], args[2]);
+        String subscriptionName = PubsubUtils.getFullyQualifiedResourceName(
+                PubsubUtils.ResourceType.SUBSCRIPTION, args[0], args[2]);
         Subscription subscription = new Subscription()
-                .setTopic(Utils.getFullyQualifiedResourceName(
-                        Utils.ResourceType.TOPIC, args[0], args[3]));
+                .setTopic(PubsubUtils.getFullyQualifiedResourceName(
+                        PubsubUtils.ResourceType.TOPIC, args[0], args[3]));
         subscription = client.projects().subscriptions()
                 .create(subscriptionName, subscription)
                 .execute();
@@ -37,8 +37,8 @@ public class SubscriptionMethods {
     public static void pullMessages(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);
-        String subscriptionName = Utils.getFullyQualifiedResourceName(
-                Utils.ResourceType.SUBSCRIPTION, args[0], args[2]);
+        String subscriptionName = PubsubUtils.getFullyQualifiedResourceName(
+                PubsubUtils.ResourceType.SUBSCRIPTION, args[0], args[2]);
         PullRequest pullRequest = new PullRequest()
                 .setReturnImmediately(false)
                 .setMaxMessages(Main.BATCH_SIZE);
@@ -100,8 +100,8 @@ public class SubscriptionMethods {
     public static void deleteSubscription(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);
-        String subscriptionName = Utils.getFullyQualifiedResourceName(
-                Utils.ResourceType.SUBSCRIPTION, args[0], args[2]);
+        String subscriptionName = PubsubUtils.getFullyQualifiedResourceName(
+                PubsubUtils.ResourceType.SUBSCRIPTION, args[0], args[2]);
         client.projects().subscriptions().delete(subscriptionName).execute();
         System.out.printf("Subscription %s was deleted.\n", subscriptionName);
     }

@@ -29,8 +29,8 @@ public class TopicMethods {
     public static void createTopic(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);
-        String topicName = Utils.getFullyQualifiedResourceName(
-                Utils.ResourceType.TOPIC, args[0], args[2]);
+        String topicName = PubsubUtils.getFullyQualifiedResourceName(
+                PubsubUtils.ResourceType.TOPIC, args[0], args[2]);
         Topic topic = client.projects().topics()
                 .create(topicName, new Topic())
                 .execute();
@@ -42,8 +42,8 @@ public class TopicMethods {
         Main.checkArgsLength(args, 5);
         String server = args[3];
         String channel = args[4];
-        String topic = Utils.getFullyQualifiedResourceName(
-                Utils.ResourceType.TOPIC, args[0], args[2]);
+        String topic = PubsubUtils.getFullyQualifiedResourceName(
+                PubsubUtils.ResourceType.TOPIC, args[0], args[2]);
         String nick = String.format("bot-%s", args[0]);
         Socket socket = new Socket(server, PORT);
         BufferedWriter writer = new BufferedWriter(
@@ -108,8 +108,8 @@ public class TopicMethods {
     public static void publishMessage(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 4);
-        String topic = Utils.getFullyQualifiedResourceName(
-                Utils.ResourceType.TOPIC, args[0], args[2]);
+        String topic = PubsubUtils.getFullyQualifiedResourceName(
+                PubsubUtils.ResourceType.TOPIC, args[0], args[2]);
         String message = args[3];
         PubsubMessage pubsubMessage = new PubsubMessage()
                 .encodeData(message.getBytes("UTF-8"));
@@ -130,8 +130,8 @@ public class TopicMethods {
     public static void deleteTopic(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);
-        String topicName = Utils.getFullyQualifiedResourceName(
-                Utils.ResourceType.TOPIC, args[0], args[2]);
+        String topicName = PubsubUtils.getFullyQualifiedResourceName(
+                PubsubUtils.ResourceType.TOPIC, args[0], args[2]);
         client.projects().topics().delete(topicName).execute();
         System.out.printf("Topic %s was deleted.\n", topicName);
     }
