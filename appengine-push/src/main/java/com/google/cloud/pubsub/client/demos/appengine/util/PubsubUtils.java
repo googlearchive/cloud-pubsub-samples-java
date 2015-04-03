@@ -16,25 +16,20 @@
 
 package com.google.cloud.pubsub.client.demos.appengine.util;
 
-import com.google.api.client.extensions.appengine.http.UrlFetchTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.extensions.appengine.auth.oauth2
-        .AppIdentityCredential;
+import com.google.api.client.googleapis.util.Utils;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.pubsub.Pubsub;
 import com.google.api.services.pubsub.PubsubScopes;
 import com.google.appengine.api.appidentity.AppIdentityService;
 import com.google.appengine.api.appidentity.AppIdentityServiceFactory;
-import com.google.appengine.api.utils.SystemProperty;
 import com.google.apphosting.api.ApiProxy;
 import com.google.cloud.pubsub.client.demos.appengine.Constants;
+import com.google.common.base.Preconditions;
 
-import java.io.File;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 /**
  * Utility class to interact with the Pub/Sub API.
@@ -44,9 +39,28 @@ public final class PubsubUtils {
     private static final String APPLICATION_NAME =
             "google-cloud-pubsub-appengine-sample/1.0";
 
+    /**
+     * Builds a new Pubsub client with default HttpTransport and JsonFactory and returns it.
+     *
+     * @return Pubsub client.
+     * @throws IOException when we can not get the default credentials.
+     */
     public static Pubsub getClient() throws IOException {
-        HttpTransport transport = new UrlFetchTransport();
-        JsonFactory jsonFactory = new JacksonFactory();
+        return getClient(Utils.getDefaultTransport(), Utils.getDefaultJsonFactory());
+    }
+
+    /**
+     * Builds a new Pubsub client and returns it.
+     *
+     * @param httpTransport HttpTransport for Pubsub client.
+     * @param jsonFactory JsonFactory for Pubsub client.
+     * @return Pubsub client.
+     * @throws IOException when we can not get the default credentials.
+     */
+    public static Pubsub getClient(HttpTransport httpTransport, JsonFactory jsonFactory)
+            throws IOException {
+        Preconditions.checkNotNull(httpTransport);
+        Preconditions.checkNotNull(jsonFactory);
         GoogleCredential credential = GoogleCredential.getApplicationDefault();
         if (credential.createScopedRequired()) {
             credential = credential.createScoped(PubsubScopes.all());
@@ -55,11 +69,9 @@ public final class PubsubUtils {
         // retry upon failures.
         HttpRequestInitializer initializer =
                 new RetryHttpInitializerWrapper(credential);
-        Pubsub client = new Pubsub.Builder(transport, jsonFactory, initializer)
+        return new Pubsub.Builder(httpTransport, jsonFactory, initializer)
                 .setApplicationName(APPLICATION_NAME)
                 .build();
-
-        return client;
     }
 
     public static String getAppTopicName() {

@@ -15,12 +15,7 @@ import java.io.PrintWriter;
  */
 public class Main {
 
-    static final int BATCH_SIZE = 10;
-
-    private static final String SERVICE_ACCOUNT_EMAIL_ENV_NAME =
-            "SERVICE_ACCOUNT_EMAIL";
-
-    private static final String P12_PATH_ENV_NAME = "P12_PATH";
+    static final int BATCH_SIZE = 1000;
 
     static final String LOOP_ENV_NAME = "LOOP";
 
@@ -120,7 +115,7 @@ public class Main {
         if (cmd.hasOption("loop")) {
             System.setProperty(LOOP_ENV_NAME, "loop");
         }
-        Pubsub client = Utils.getClient();
+        Pubsub client = PubsubUtils.getClient();
         try {
             CmdLineOperation cmdLineOperation =
                     CmdLineOperation.valueOf(cmdArgs[1]);
