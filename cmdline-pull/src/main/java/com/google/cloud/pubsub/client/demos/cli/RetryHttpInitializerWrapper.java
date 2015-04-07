@@ -46,6 +46,7 @@ public class RetryHttpInitializerWrapper implements HttpRequestInitializer {
 
     @Override
     public void initialize(HttpRequest request) {
+        request.setReadTimeout(2 * 60000); // 2 minutes read timeout
         final HttpUnsuccessfulResponseHandler backoffHandler =
                 new HttpBackOffUnsuccessfulResponseHandler(
                         new ExponentialBackOff())
