@@ -55,12 +55,12 @@ public class SubscriptionMethods {
                 for (ReceivedMessage receivedMessage : receivedMessages) {
                     PubsubMessage pubsubMessage =
                             receivedMessage.getMessage();
-                    if (pubsubMessage != null) {
+                    if (pubsubMessage != null && pubsubMessage.decodeData() != null) {
                         System.out.println(
                                 new String(pubsubMessage.decodeData(),
                                         "UTF-8"));
-                        ackIds.add(receivedMessage.getAckId());
                     }
+                    ackIds.add(receivedMessage.getAckId());
                 }
                 AcknowledgeRequest ackRequest = new AcknowledgeRequest();
                 ackRequest.setAckIds(ackIds);
