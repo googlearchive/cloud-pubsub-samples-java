@@ -33,7 +33,8 @@ import javax.servlet.http.HttpServletResponse;
 public class SendMessageServlet extends HttpServlet {
 
     @Override
-    public void doPost(HttpServletRequest req, HttpServletResponse resp)
+    public final void doPost(final HttpServletRequest req,
+                             final HttpServletResponse resp)
             throws IOException {
         Pubsub client = PubsubUtils.getClient();
         String message = req.getParameter("message");

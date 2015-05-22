@@ -47,13 +47,14 @@ public class FetchMessagesServlet extends HttpServlet {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void doGet(HttpServletRequest req, HttpServletResponse resp)
+    public final void doGet(final HttpServletRequest req,
+                            final HttpServletResponse resp)
             throws IOException {
         // First retrieve messages from the memcache
         MemcacheService memcacheService = MemcacheServiceFactory
                 .getMemcacheService();
         List<String> messages =
-                (List<String>)memcacheService.get(Constants.MESSAGE_CACHE_KEY);
+                (List<String>) memcacheService.get(Constants.MESSAGE_CACHE_KEY);
         if (messages == null) {
             // If no messages in the memcache, look for the datastore
             DatastoreService datastore =

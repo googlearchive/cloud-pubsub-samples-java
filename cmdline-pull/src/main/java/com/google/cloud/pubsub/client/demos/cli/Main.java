@@ -14,12 +14,27 @@ import java.io.PrintWriter;
 /**
  * Main class for the Cloud Pub/Sub command line sample application.
  */
-public class Main {
+public final class Main {
 
+    /**
+     * Prevents initialization.
+     */
+    private Main() {
+    }
+
+    /**
+     * Pull batch seize.
+     */
     static final int BATCH_SIZE = 1000;
 
+    /**
+     * A name of environment variable for decide whether or not to loop.
+     */
     static final String LOOP_ENV_NAME = "LOOP";
 
+    /**
+     * Options for parser.
+     */
     private static Options options;
 
     static {
@@ -33,56 +48,115 @@ public class Main {
      * Enum representing subcommands.
      */
     private enum CmdLineOperation {
+        /**
+         * Action for creating a new topic.
+         */
         create_topic {
             @Override
-            void run(Pubsub client, String[] args) throws IOException {
+            void run(final Pubsub client, final String[] args)
+                    throws IOException {
                 TopicMethods.createTopic(client, args);
             }
-        }, publish_message {
+        },
+        /**
+         * Action for publishing a message to a topic.
+         */
+        publish_message {
             @Override
-            void run(Pubsub client, String[] args) throws IOException {
+            void run(final Pubsub client, final String[] args)
+                    throws IOException {
                 TopicMethods.publishMessage(client, args);
             }
-        }, connect_irc {
+        },
+        /**
+         * Action for connecting to an IRC channel and publishing messages to a
+         * topic.
+         */
+        connect_irc {
             @Override
-            void run(Pubsub client, String[] args) throws IOException {
+            void run(final Pubsub client, final String[] args)
+                    throws IOException {
                 TopicMethods.connectIrc(client, args);
             }
-        }, list_topics {
+        },
+        /**
+         * Action for listing topics in a project.
+         */
+        list_topics {
             @Override
-            void run(Pubsub client, String[] args) throws IOException {
+            void run(final Pubsub client, final String[] args)
+                    throws IOException {
                 TopicMethods.listTopics(client, args);
             }
-        }, delete_topic {
+        },
+        /**
+         * Action for deleting a topic.
+         */
+        delete_topic {
             @Override
-            void run(Pubsub client, String[] args) throws IOException {
+            void run(final Pubsub client, final String[] args)
+                    throws IOException {
                 TopicMethods.deleteTopic(client, args);
             }
-        }, create_subscription {
+        },
+        /**
+         * Action for creating a new subscription.
+         */
+        create_subscription {
             @Override
-            void run(Pubsub client, String[] args) throws IOException {
+            void run(final Pubsub client, final String[] args)
+                    throws IOException {
                 SubscriptionMethods.createSubscription(client, args);
             }
-        }, pull_messages {
+        },
+        /**
+         * Action for pulling messages from a subscription.
+         */
+        pull_messages {
             @Override
-            void run(Pubsub client, String[] args) throws IOException {
+            void run(final Pubsub client, final String[] args)
+                    throws IOException {
                 SubscriptionMethods.pullMessages(client, args);
             }
-        }, list_subscriptions {
+        },
+        /**
+         * Action for listing subscriptions in a project.
+         */
+        list_subscriptions {
             @Override
-            void run(Pubsub client, String[] args) throws IOException {
+            void run(final Pubsub client, final String[] args)
+                    throws IOException {
                 SubscriptionMethods.listSubscriptions(client, args);
             }
-        }, delete_subscription {
+        },
+        /**
+         * Action for deleting a subscription.
+         */
+        delete_subscription {
             @Override
-            void run(Pubsub client, String[] args) throws IOException {
+            void run(final Pubsub client, final String[] args)
+                    throws IOException {
                 SubscriptionMethods.deleteSubscription(client, args);
             }
         };
+
+        /**
+         * Abstruct method for this Enum.
+         *
+         * @param client Cloud Pub/Sub client.
+         * @param args Command line arguments.
+         * @throws IOException when Cloud Pub/Sub API calls fail.
+         */
         abstract void run(Pubsub client, String[] args) throws IOException;
     }
 
-    static void checkArgsLength(String[] args, int min) {
+    /**
+     * Checks if the argument has enough length.
+     *
+     * @param args Command line arguments.
+     * @param min Minimum length of the arguments.
+     */
+    static void checkArgsLength(final String[] args, final int min) {
         if (args.length < min) {
             help();
             System.exit(1);
@@ -102,7 +176,8 @@ public class Main {
                         + "PROJ create_topic TOPIC\n"
                         + "PROJ delete_topic TOPIC\n"
                         + "PROJ list_subscriptions\n"
-                        + "PROJ create_subscription SUBSCRIPTION LINKED_TOPIC [PUSH_ENDPOINT]\n"
+                        + "PROJ create_subscription SUBSCRIPTION LINKED_TOPIC "
+                        + "[PUSH_ENDPOINT]\n"
                         + "PROJ delete_subscription SUBSCRIPTION\n"
                         + "PROJ connect_irc TOPIC SERVER CHANNEL\n"
                         + "PROJ publish_message TOPIC MESSAGE\n"
@@ -113,8 +188,11 @@ public class Main {
 
     /**
      * Parses the command line arguments and calls a corresponding method.
+     *
+     * @param args Command line arguments.
+     * @throws Exception when something bad happens.
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(final String[] args) throws Exception {
         CommandLineParser parser = new BasicParser();
         CommandLine cmd = parser.parse(options, args);
         String[] cmdArgs = cmd.getArgs();

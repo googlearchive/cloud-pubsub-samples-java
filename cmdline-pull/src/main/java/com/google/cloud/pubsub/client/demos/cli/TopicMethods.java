@@ -21,15 +21,32 @@ import java.util.regex.Pattern;
 /**
  * Class TopicMethods contains static methods for topics.
  */
-public class TopicMethods {
+public final class TopicMethods {
 
+    /**
+     * Prevents initialization.
+     */
+    private TopicMethods() {
+    }
+
+    /**
+     * IRC bot name.
+     */
     private static final String BOT_NAME = "pubsub-irc-bot/1.0";
+
+    /**
+     * IRC port number.
+     */
     private static final int PORT = 6667;
 
     /**
      * Creates a new topic with a given name.
+     *
+     * @param client Cloud Pub/Sub client.
+     * @param args Command line arguments.
+     * @throws IOException when Cloud Pub/Sub API calls fail.
      */
-    public static void createTopic(Pubsub client, String[] args)
+    public static void createTopic(final Pubsub client, final String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);
         String topicName = PubsubUtils.getFullyQualifiedResourceName(
@@ -42,8 +59,12 @@ public class TopicMethods {
 
     /**
      * Connects an IRC channel and publish the chat messages to the given topic.
+     *
+     * @param client Cloud Pub/Sub client.
+     * @param args Command line arguments.
+     * @throws IOException when Cloud Pub/Sub API calls fail.
      */
-    public static void connectIrc(Pubsub client, String[] args)
+    public static void connectIrc(final Pubsub client, final String[] args)
             throws IOException {
         Main.checkArgsLength(args, 5);
         final String server = args[3];
@@ -114,8 +135,12 @@ public class TopicMethods {
 
     /**
      * Publishes the given message to the given topic.
+     *
+     * @param client Cloud Pub/Sub client.
+     * @param args Command line arguments.
+     * @throws IOException when Cloud Pub/Sub API calls fail.
      */
-    public static void publishMessage(Pubsub client, String[] args)
+    public static void publishMessage(final Pubsub client, final String[] args)
             throws IOException {
         Main.checkArgsLength(args, 4);
         String topic = PubsubUtils.getFullyQualifiedResourceName(
@@ -139,8 +164,12 @@ public class TopicMethods {
 
     /**
      * Deletes a topic with the given name.
+     *
+     * @param client Cloud Pub/Sub client.
+     * @param args Command line arguments.
+     * @throws IOException when Cloud Pub/Sub API calls fail.
      */
-    public static void deleteTopic(Pubsub client, String[] args)
+    public static void deleteTopic(final Pubsub client, final String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);
         String topicName = PubsubUtils.getFullyQualifiedResourceName(
@@ -151,8 +180,12 @@ public class TopicMethods {
 
     /**
      * Lists existing topics in the project.
+     *
+     * @param client Cloud Pub/Sub client.
+     * @param args Command line arguments.
+     * @throws IOException when Cloud Pub/Sub API calls fail.
      */
-    public static void listTopics(Pubsub client, String[] args)
+    public static void listTopics(final Pubsub client, final String[] args)
             throws IOException {
         String nextPageToken = null;
         boolean hasTopics = false;

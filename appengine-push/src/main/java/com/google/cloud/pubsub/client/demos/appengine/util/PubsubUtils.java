@@ -36,17 +36,28 @@ import java.io.IOException;
  */
 public final class PubsubUtils {
 
+    /**
+     * The application name will be attached to the API requests.
+     */
     private static final String APPLICATION_NAME =
             "google-cloud-pubsub-appengine-sample/1.0";
 
     /**
-     * Builds a new Pubsub client with default HttpTransport and JsonFactory and returns it.
+     * Prevents instantiation.
+     */
+    private PubsubUtils() {
+    }
+
+    /**
+     * Builds a new Pubsub client with default HttpTransport and
+     * JsonFactory and returns it.
      *
      * @return Pubsub client.
      * @throws IOException when we can not get the default credentials.
      */
     public static Pubsub getClient() throws IOException {
-        return getClient(Utils.getDefaultTransport(), Utils.getDefaultJsonFactory());
+        return getClient(Utils.getDefaultTransport(),
+                         Utils.getDefaultJsonFactory());
     }
 
     /**
@@ -57,7 +68,8 @@ public final class PubsubUtils {
      * @return Pubsub client.
      * @throws IOException when we can not get the default credentials.
      */
-    public static Pubsub getClient(HttpTransport httpTransport, JsonFactory jsonFactory)
+    public static Pubsub getClient(final HttpTransport httpTransport,
+                                   final JsonFactory jsonFactory)
             throws IOException {
         Preconditions.checkNotNull(httpTransport);
         Preconditions.checkNotNull(jsonFactory);
@@ -74,16 +86,28 @@ public final class PubsubUtils {
                 .build();
     }
 
+    /**
+     * Returns a topic name for this application.
+     *
+     * @return a topic name.
+     */
     public static String getAppTopicName() {
         return "topic-pubsub-api-appengine-sample";
     }
 
+    /**
+     * Returns a subscription name for this application.
+     *
+     * @return a subscription name.
+     */
     public static String getAppSubscriptionName() {
         return "subscription-" + getProjectId();
     }
 
     /**
      * Returns the push endpoint URL.
+     *
+     * @return the push endpoint URL.
      */
     public static String getAppEndpointUrl() {
         String subscriptionUniqueToken = System.getProperty(
@@ -95,6 +119,8 @@ public final class PubsubUtils {
 
     /**
      * Returns the project ID.
+     *
+     * @return the project ID.
      */
     public static String getProjectId() {
         AppIdentityService identityService =

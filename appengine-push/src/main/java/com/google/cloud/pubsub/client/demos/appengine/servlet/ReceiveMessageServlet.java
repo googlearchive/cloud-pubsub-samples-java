@@ -39,7 +39,8 @@ public class ReceiveMessageServlet extends HttpServlet {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void doPost(HttpServletRequest req, HttpServletResponse resp)
+    public final void doPost(final HttpServletRequest req,
+                             final HttpServletResponse resp)
             throws IOException {
         // Validating unique subscription token before processing the message
         String subscriptionToken = System.getProperty(

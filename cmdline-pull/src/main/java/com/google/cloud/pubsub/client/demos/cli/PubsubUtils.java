@@ -14,41 +14,78 @@ import java.io.IOException;
 /**
  * Utility class for this sample application.
  */
-public class PubsubUtils {
+public final class PubsubUtils {
 
+    /**
+     * The application name will be attached to the API requests.
+     */
     private static final String APP_NAME = "cloud-pubsub-sample-cli/1.0";
+
+    /**
+     * Prevents instantiation.
+     */
+    private PubsubUtils() {
+    }
 
     /**
      * Enum representing a resource type.
      */
     public enum ResourceType {
+        /**
+         * Represents topics.
+         */
         TOPIC("topics"),
+        /**
+         * Represents subscriptions.
+         */
         SUBSCRIPTION("subscriptions");
-        public String collectionName;
-        private ResourceType(String collectionName) {
+        /**
+         * A path representation for the resource.
+         */
+        private String collectionName;
+        /**
+         * A constructor.
+         *
+         * @param collectionName String representation of the resource.
+         */
+        private ResourceType(final String collectionName) {
             this.collectionName = collectionName;
         }
-    }
-    /**
-     * Returns the fully qualified resource name for Pub/Sub.
-     *
-     * @param resource topic name or subscription name
-     * @return A string in a form of PROJECT_NAME/RESOURCE_NAME
-     */
-    public static String getFullyQualifiedResourceName(
-            ResourceType resourceType, String project, String resource) {
-        return String.format("projects/%s/%s/%s",
-                project, resourceType.collectionName, resource);
+        /**
+         * Returns its collection name.
+         *
+         * @return the collection name.
+         */
+        public String getCollectionName() {
+            return this.collectionName;
+        }
     }
 
     /**
-     * Builds a new Pubsub client with default HttpTransport and JsonFactory and returns it.
+     * Returns the fully qualified resource name for Pub/Sub.
+     *
+     * @param resourceType ResourceType.
+     * @param project A project id.
+     * @param resource topic name or subscription name.
+     * @return A string in a form of PROJECT_NAME/RESOURCE_NAME
+     */
+    public static String getFullyQualifiedResourceName(
+            final ResourceType resourceType, final String project,
+            final String resource) {
+        return String.format("projects/%s/%s/%s", project,
+                             resourceType.getCollectionName(), resource);
+    }
+
+    /**
+     * Builds a new Pubsub client with default HttpTransport and
+     * JsonFactory and returns it.
      *
      * @return Pubsub client.
      * @throws IOException when we can not get the default credentials.
      */
     public static Pubsub getClient() throws IOException {
-        return getClient(Utils.getDefaultTransport(), Utils.getDefaultJsonFactory());
+        return getClient(Utils.getDefaultTransport(),
+                         Utils.getDefaultJsonFactory());
     }
 
     /**
@@ -59,18 +96,20 @@ public class PubsubUtils {
      * @return Pubsub client.
      * @throws IOException when we can not get the default credentials.
      */
-    public static Pubsub getClient(HttpTransport httpTransport, JsonFactory jsonFactory)
+    public static Pubsub getClient(final HttpTransport httpTransport,
+                                   final JsonFactory jsonFactory)
              throws IOException {
         Preconditions.checkNotNull(httpTransport);
         Preconditions.checkNotNull(jsonFactory);
         GoogleCredential credential =
-                GoogleCredential.getApplicationDefault(httpTransport, jsonFactory);
+            GoogleCredential.getApplicationDefault(httpTransport, jsonFactory);
         if (credential.createScopedRequired()) {
             credential = credential.createScoped(PubsubScopes.all());
         }
         // Please use custom HttpRequestInitializer for automatic
         // retry upon failures.
-        HttpRequestInitializer initializer = new RetryHttpInitializerWrapper(credential);
+        HttpRequestInitializer initializer =
+            new RetryHttpInitializerWrapper(credential);
         return new Pubsub.Builder(httpTransport, jsonFactory, initializer)
                 .setApplicationName(APP_NAME)
                 .build();
