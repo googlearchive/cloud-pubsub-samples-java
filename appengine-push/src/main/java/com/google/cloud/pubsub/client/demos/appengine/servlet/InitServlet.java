@@ -17,18 +17,19 @@
 package com.google.cloud.pubsub.client.demos.appengine.servlet;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.pubsub.Pubsub;
 import com.google.api.services.pubsub.model.PushConfig;
 import com.google.api.services.pubsub.model.Subscription;
 import com.google.api.services.pubsub.model.Topic;
 import com.google.cloud.pubsub.client.demos.appengine.util.PubsubUtils;
 
+import java.io.IOException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * Entry point that initializes the application Pub/Sub resources.
@@ -36,7 +37,8 @@ import java.io.IOException;
 public class InitServlet extends HttpServlet {
 
     @Override
-    public void doGet(HttpServletRequest req, HttpServletResponse resp)
+    public final void doGet(final HttpServletRequest req,
+                            final HttpServletResponse resp)
             throws IOException {
         Pubsub client = PubsubUtils.getClient();
         String projectId = PubsubUtils.getProjectId();
@@ -58,8 +60,13 @@ public class InitServlet extends HttpServlet {
         }
     }
 
-    private final void setupTopic(Pubsub client)
-            throws IOException {
+    /**
+     * Creates a Cloud Pub/Sub topic if it doesn't exist.
+     *
+     * @param client Pubsub client object.
+     * @throws IOException when API calls to Cloud Pub/Sub fails.
+     */
+    private void setupTopic(final Pubsub client) throws IOException {
         String fullName = String.format("projects/%s/topics/%s",
                 PubsubUtils.getProjectId(),
                 PubsubUtils.getAppTopicName());
@@ -67,7 +74,7 @@ public class InitServlet extends HttpServlet {
         try {
             client.projects().topics().get(fullName).execute();
         } catch (GoogleJsonResponseException e) {
-            if (e.getStatusCode() == 404) {
+            if (e.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
                 // Create the topic if it doesn't exist
                 client.projects().topics()
                         .create(fullName, new Topic())
@@ -78,8 +85,13 @@ public class InitServlet extends HttpServlet {
         }
     }
 
-    private final void setupSubscription(Pubsub client)
-            throws IOException {
+    /**
+     * Creates a Cloud Pub/Sub subscription if it doesn't exist.
+     *
+     * @param client Pubsub client object.
+     * @throws IOException when API calls to Cloud Pub/Sub fails.
+     */
+    private void setupSubscription(final Pubsub client) throws IOException {
         String fullName = String.format("projects/%s/subscriptions/%s",
                 PubsubUtils.getProjectId(),
                 PubsubUtils.getAppSubscriptionName());
@@ -87,7 +99,7 @@ public class InitServlet extends HttpServlet {
         try {
             client.projects().subscriptions().get(fullName).execute();
         } catch (GoogleJsonResponseException e) {
-            if (e.getStatusCode() == 404) {
+            if (e.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
                 // Create the subscription if it doesn't exist
                 String fullTopicName = String.format("projects/%s/topics/%s",
                         PubsubUtils.getProjectId(),

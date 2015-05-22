@@ -22,10 +22,10 @@ import com.google.api.services.pubsub.model.PubsubMessage;
 import com.google.cloud.pubsub.client.demos.appengine.util.PubsubUtils;
 import com.google.common.collect.ImmutableList;
 
+import java.io.IOException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * Publishes messages to the application topic.
@@ -33,7 +33,8 @@ import java.io.IOException;
 public class SendMessageServlet extends HttpServlet {
 
     @Override
-    public void doPost(HttpServletRequest req, HttpServletResponse resp)
+    public final void doPost(final HttpServletRequest req,
+                             final HttpServletResponse resp)
             throws IOException {
         Pubsub client = PubsubUtils.getClient();
         String message = req.getParameter("message");

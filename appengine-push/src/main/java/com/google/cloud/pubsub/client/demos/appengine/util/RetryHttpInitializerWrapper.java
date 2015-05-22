@@ -21,32 +21,59 @@ import java.util.logging.Logger;
  */
 public class RetryHttpInitializerWrapper implements HttpRequestInitializer {
 
+    /**
+     * A private logger.
+     */
     private static final Logger LOG =
             Logger.getLogger(RetryHttpInitializerWrapper.class.getName());
 
-    // Intercepts the request for filling in the "Authorization"
-    // header field, as well as recovering from certain unsuccessful
-    // error codes wherein the Credential must refresh its token for a
-    // retry.
+    /**
+     * One minutes in miliseconds.
+     */
+    private static final int ONEMINITUES = 60000;
+
+    /**
+     * Intercepts the request for filling in the "Authorization"
+     * header field, as well as recovering from certain unsuccessful
+     * error codes wherein the Credential must refresh its token for a
+     * retry.
+     */
     private final Credential wrappedCredential;
 
-    // A sleeper; you can replace it with a mock in your test.
+    /**
+     * A sleeper; you can replace it with a mock in your test.
+     */
     private final Sleeper sleeper;
 
-    public RetryHttpInitializerWrapper(Credential wrappedCredential) {
+    /**
+     * A constructor.
+     *
+     * @param wrappedCredential Credential which will be wrapped and
+     * used for providing auth header.
+     */
+    public RetryHttpInitializerWrapper(final Credential wrappedCredential) {
         this(wrappedCredential, Sleeper.DEFAULT);
     }
 
-    // Use only for testing.
+    /**
+     * A protected constructor only for testing.
+     *
+     * @param wrappedCredential Credential which will be wrapped and
+     * used for providing auth header.
+     * @param sleeper Sleeper for easy testing.
+     */
     RetryHttpInitializerWrapper(
-            Credential wrappedCredential, Sleeper sleeper) {
+            final Credential wrappedCredential, final Sleeper sleeper) {
         this.wrappedCredential = Preconditions.checkNotNull(wrappedCredential);
         this.sleeper = sleeper;
     }
 
+    /**
+     * Initializes the given request.
+     */
     @Override
-    public void initialize(HttpRequest request) {
-        request.setReadTimeout(2 * 60000); // 2 minutes read timeout
+    public final void initialize(final HttpRequest request) {
+        request.setReadTimeout(2 * ONEMINITUES); // 2 minutes read timeout
         final HttpUnsuccessfulResponseHandler backoffHandler =
                 new HttpBackOffUnsuccessfulResponseHandler(
                         new ExponentialBackOff())
@@ -56,9 +83,9 @@ public class RetryHttpInitializerWrapper implements HttpRequestInitializer {
                 new HttpUnsuccessfulResponseHandler() {
                     @Override
                     public boolean handleResponse(
-                            HttpRequest request,
-                            HttpResponse response,
-                            boolean supportsRetry) throws IOException {
+                            final HttpRequest request,
+                            final HttpResponse response,
+                            final boolean supportsRetry) throws IOException {
                         if (wrappedCredential.handleResponse(
                                 request, response, supportsRetry)) {
                             // If credential decides it can handle it,

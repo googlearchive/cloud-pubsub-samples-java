@@ -17,21 +17,20 @@
 package com.google.cloud.dataflow.examples;
 
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpBackOffIOExceptionHandler;
 import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpUnsuccessfulResponseHandler;
-import com.google.api.client.util.ExponentialBackOff;
-import com.google.api.client.util.Sleeper;
-
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.HttpUnsuccessfulResponseHandler;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.client.util.Sleeper;
 
 import com.google.api.services.pubsub.Pubsub;
 import com.google.api.services.pubsub.PubsubScopes;
@@ -41,8 +40,8 @@ import com.google.api.services.pubsub.model.PubsubMessage;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
-// Imports for using WebSockets.
 import org.glassfish.tyrus.client.ClientManager;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -68,7 +67,7 @@ public class WebSocketInjectorStub {
 
   class RetryHttpInitializerWrapper implements HttpRequestInitializer {
 
-    private Logger LOG =
+    private Logger logger =
         Logger.getLogger(RetryHttpInitializerWrapper.class.getName());
 
     // Intercepts the request for filling in the "Authorization"
@@ -81,51 +80,52 @@ public class WebSocketInjectorStub {
     private final Sleeper sleeper;
 
     public RetryHttpInitializerWrapper(GoogleCredential wrappedCredential) {
-        this(wrappedCredential, Sleeper.DEFAULT);
+      this(wrappedCredential, Sleeper.DEFAULT);
     }
 
     // Use only for testing.
     RetryHttpInitializerWrapper(
             GoogleCredential wrappedCredential, Sleeper sleeper) {
-        this.wrappedCredential = Preconditions.checkNotNull(wrappedCredential);
-        this.sleeper = sleeper;
+      this.wrappedCredential = Preconditions.checkNotNull(wrappedCredential);
+      this.sleeper = sleeper;
     }
 
     @Override
     public void initialize(HttpRequest request) {
-        final HttpUnsuccessfulResponseHandler backoffHandler =
-            new HttpBackOffUnsuccessfulResponseHandler(
-                new ExponentialBackOff())
-                    .setSleeper(sleeper);
-        request.setInterceptor(wrappedCredential);
-        request.setUnsuccessfulResponseHandler(
-                new HttpUnsuccessfulResponseHandler() {
-                    @Override
-                    public boolean handleResponse(
-                            HttpRequest request,
-                            HttpResponse response,
-                            boolean supportsRetry) throws IOException {
-                        if (wrappedCredential.handleResponse(
-                                request, response, supportsRetry)) {
-                            // If credential decides it can handle it,
-                            // the return code or message indicated
-                            // something specific to authentication,
-                            // and no backoff is desired.
-                            return true;
-                        } else if (backoffHandler.handleResponse(
-                                request, response, supportsRetry)) {
-                            // Otherwise, we defer to the judgement of
-                            // our internal backoff handler.
-                          LOG.info("Retrying " + request.getUrl());
-                          return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                });
-        request.setIOExceptionHandler(
-            new HttpBackOffIOExceptionHandler(new ExponentialBackOff())
-                .setSleeper(sleeper));
+      final HttpUnsuccessfulResponseHandler backoffHandler =
+          new HttpBackOffUnsuccessfulResponseHandler(
+              new ExponentialBackOff())
+          .setSleeper(sleeper);
+      request.setInterceptor(wrappedCredential);
+      request.setUnsuccessfulResponseHandler(
+          new HttpUnsuccessfulResponseHandler() {
+              @Override
+              public boolean handleResponse(HttpRequest request,
+                                            HttpResponse response,
+                                            boolean supportsRetry)
+                  throws IOException {
+                if (wrappedCredential.handleResponse(request,
+                                                     response,
+                                                     supportsRetry)) {
+                  // If credential decides it can handle it, the
+                  // return code or message indicated something
+                  // specific to authentication, and no backoff is
+                  // desired.
+                  return true;
+                } else if (backoffHandler.handleResponse(request,
+                                                         response,
+                                                         supportsRetry)) {
+                  // Otherwise, we defer to the judgement of our
+                  // internal backoff handler.
+                  logger.info("Retrying " + request.getUrl());
+                  return true;
+                } else {
+                  return false;
+                }
+              }
+          });
+      request.setIOExceptionHandler(new HttpBackOffIOExceptionHandler(
+          new ExponentialBackOff()).setSleeper(sleeper));
     }
   }
 
@@ -138,12 +138,18 @@ public class WebSocketInjectorStub {
 
   private Integer batchSize;
 
+  /**
+   * A constructor of WebSocketInjectorStub.
+   */
   public WebSocketInjectorStub(Pubsub pubsub) {
     this.pubsub = pubsub;
     this.messages = new ArrayList<>(1);
     this.batchSize = new Integer(200);
   }
 
+  /**
+   * A callback when created a new websocket connection.
+   */
   @OnOpen
   public void onOpen(Session session) {
     logger.info("Connected ... " + session.getId());
@@ -154,6 +160,9 @@ public class WebSocketInjectorStub {
     }
   }
 
+  /**
+   * A callback when a websocket connection is disconnected.
+   */
   @OnClose
   public void onClose(Session session, CloseReason closeReason) {
     logger.info(String.format("Session %s close because of %s", session.getId(),
@@ -161,12 +170,18 @@ public class WebSocketInjectorStub {
     latch.countDown();
   }
 
+  /**
+   * A callback when a message comes through a websocket connection.
+   */
   @OnMessage
   public void onMessage(String message, Session session) {
     //    logger.info("Received ...." + message);
     handleMessage(message);
   }
 
+  /**
+   * Parses the message and publishes the formatted string to a Cloud Pub/Sub topic.
+   */
   public void handleMessage(String message) {
     System.out.println(">> message???");
 
@@ -174,7 +189,7 @@ public class WebSocketInjectorStub {
 
     String minorEdit = jsonObject.get("is_minor").toString();
     String pageTitle = jsonObject.getString("page_title");
-    String pageURL = jsonObject.getString("url");
+    String pageUrl = jsonObject.getString("url");
     String isBot = jsonObject.get("is_bot").toString();
     String isNew = jsonObject.get("is_new").toString();
     String user = jsonObject.getString("user");
@@ -182,18 +197,18 @@ public class WebSocketInjectorStub {
     String changeSize = jsonObject.get("change_size").toString();
 
     String country;
-      JsonObject geoIP = jsonObject.getJsonObject("geo_ip");
-      if (geoIP == null) {
-        country = new String("unknown country");
-      } else {
-        country = geoIP.getString("country_name");
-      }
+    JsonObject geoIp = jsonObject.getJsonObject("geo_ip");
+    if (geoIp == null) {
+      country = new String("unknown country");
+    } else {
+      country = geoIp.getString("country_name");
+    }
 
     String separator = new String("###");
 
     String finalOutput = minorEdit + separator + pageTitle + separator
-      + pageURL + separator + isBot + separator + isNew + separator
-      + user + separator + country + separator + isAnon + separator + changeSize;
+        + pageUrl + separator + isBot + separator + isNew + separator
+        + user + separator + country + separator + isAnon + separator + changeSize;
 
     if (finalOutput.isEmpty()) {
       return;
@@ -206,6 +221,7 @@ public class WebSocketInjectorStub {
     try {
       pubsubMessage.encodeData(finalOutput.getBytes("UTF-8"));
     } catch (java.io.UnsupportedEncodingException e) {
+      ;
     }
 
     /*
@@ -232,8 +248,8 @@ public class WebSocketInjectorStub {
             try {
               pubsub.topics().publish(publishRequest).execute();
             } catch (java.io.IOException e) {
+              ;
             }
-
           }
         });
       thread.start();
@@ -244,9 +260,11 @@ public class WebSocketInjectorStub {
   }
 
 
-  private static final JsonFactory JSON_FACTORY =
-    JacksonFactory.getDefaultInstance();
+  private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
+  /**
+   * Creates a Cloud Pub/Sub client.
+   */
   public Pubsub createPubsubClient()
     throws IOException, GeneralSecurityException {
     HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
@@ -256,6 +274,10 @@ public class WebSocketInjectorStub {
     return new Pubsub.Builder(transport, JSON_FACTORY, initializer).build();
   }
 
+  /**
+   * Creates a new websocket connection to a URL and publishes the
+   * messages received from the connection.
+   */
   public static void main(String[] args) throws Exception {
 
     // Get options from command-line.
@@ -268,9 +290,9 @@ public class WebSocketInjectorStub {
 
     System.out.println("Output Pubsub topic: " + outputTopic);
 
-    WebSocketInjectorStub f = new WebSocketInjectorStub(null);
+    WebSocketInjectorStub injector = new WebSocketInjectorStub(null);
     // Create a Pubsub.
-    Pubsub pubsub = f.createPubsubClient();
+    Pubsub pubsub = injector.createPubsubClient();
 
     latch = new CountDownLatch(1);
  

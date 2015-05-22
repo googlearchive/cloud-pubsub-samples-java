@@ -6,6 +6,7 @@ import com.google.api.services.pubsub.model.ListSubscriptionsResponse;
 import com.google.api.services.pubsub.model.PubsubMessage;
 import com.google.api.services.pubsub.model.PullRequest;
 import com.google.api.services.pubsub.model.PullResponse;
+import com.google.api.services.pubsub.model.PushConfig;
 import com.google.api.services.pubsub.model.ReceivedMessage;
 import com.google.api.services.pubsub.model.Subscription;
 
@@ -16,9 +17,23 @@ import java.util.List;
 /**
  * Class SubscriptionMethods contains static methods for subscriptions.
  */
-public class SubscriptionMethods {
+public final class SubscriptionMethods {
 
-    public static void createSubscription(Pubsub client, String[] args)
+    /**
+     * Prevents instantiation.
+     */
+    private SubscriptionMethods() {
+    }
+
+    /**
+     * Creates a new subscription.
+     *
+     * @param client Cloud Pub/Sub client.
+     * @param args Arguments as an array of String.
+     * @throws IOException when Cloud Pub/Sub API calls fail.
+     */
+    public static void createSubscription(final Pubsub client,
+                                          final String[] args)
             throws IOException {
         Main.checkArgsLength(args, 4);
         String subscriptionName = PubsubUtils.getFullyQualifiedResourceName(
@@ -26,6 +41,10 @@ public class SubscriptionMethods {
         Subscription subscription = new Subscription()
                 .setTopic(PubsubUtils.getFullyQualifiedResourceName(
                         PubsubUtils.ResourceType.TOPIC, args[0], args[3]));
+        if (args.length == 5) {
+            subscription = subscription.setPushConfig(
+                new PushConfig().setPushEndpoint(args[4]));
+        }
         subscription = client.projects().subscriptions()
                 .create(subscriptionName, subscription)
                 .execute();
@@ -34,7 +53,14 @@ public class SubscriptionMethods {
         System.out.println(subscription.toPrettyString());
     }
 
-    public static void pullMessages(Pubsub client, String[] args)
+    /**
+     * Keeps pulling messages from the given subscription.
+     *
+     * @param client Cloud Pub/Sub client.
+     * @param args Arguments as an array of String.
+     * @throws IOException when Cloud Pub/Sub API calls fail.
+     */
+    public static void pullMessages(final Pubsub client, final String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);
         String subscriptionName = PubsubUtils.getFullyQualifiedResourceName(
@@ -55,7 +81,8 @@ public class SubscriptionMethods {
                 for (ReceivedMessage receivedMessage : receivedMessages) {
                     PubsubMessage pubsubMessage =
                             receivedMessage.getMessage();
-                    if (pubsubMessage != null && pubsubMessage.decodeData() != null) {
+                    if (pubsubMessage != null
+                            && pubsubMessage.decodeData() != null) {
                         System.out.println(
                                 new String(pubsubMessage.decodeData(),
                                         "UTF-8"));
@@ -71,7 +98,15 @@ public class SubscriptionMethods {
         } while (System.getProperty(Main.LOOP_ENV_NAME) != null);
     }
 
-    public static void listSubscriptions(Pubsub client, String[] args)
+    /**
+     * Lists existing subscriptions within a project.
+     *
+     * @param client Cloud Pub/Sub client.
+     * @param args Arguments as an array of String.
+     * @throws IOException when Cloud Pub/Sub API calls fail.
+     */
+    public static void listSubscriptions(final Pubsub client,
+                                         final String[] args)
             throws IOException {
         String nextPageToken = null;
         boolean hasSubscriptions = false;
@@ -97,7 +132,15 @@ public class SubscriptionMethods {
         }
     }
 
-    public static void deleteSubscription(Pubsub client, String[] args)
+    /**
+     * Deletes a subscription with a given name.
+     *
+     * @param client Cloud Pub/Sub client.
+     * @param args Arguments as an array of String.
+     * @throws IOException when Cloud Pub/Sub API calls fail.
+     */
+    public static void deleteSubscription(final Pubsub client,
+                                          final String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);
         String subscriptionName = PubsubUtils.getFullyQualifiedResourceName(
