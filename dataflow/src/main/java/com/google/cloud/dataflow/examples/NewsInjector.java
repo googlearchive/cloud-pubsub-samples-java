@@ -16,21 +16,20 @@
 
 package com.google.cloud.dataflow.examples;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.http.HttpBackOffIOExceptionHandler;
 import com.google.api.client.http.HttpBackOffUnsuccessfulResponseHandler;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpUnsuccessfulResponseHandler;
-import com.google.api.client.util.ExponentialBackOff;
-import com.google.api.client.util.Sleeper;
-
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.HttpUnsuccessfulResponseHandler;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.ExponentialBackOff;
+import com.google.api.client.util.Sleeper;
 
 import com.google.api.services.pubsub.Pubsub;
 import com.google.api.services.pubsub.PubsubScopes;
@@ -40,27 +39,27 @@ import com.google.api.services.pubsub.model.PubsubMessage;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
-import org.joda.time.Duration;
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.MalformedURLException;
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.logging.Logger;
-
 import com.sun.syndication.feed.synd.SyndEntry;
 import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.io.FeedException;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.XmlReader;
-import com.sun.syndication.io.FeedException;
 
+import org.joda.time.Duration;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * A streaming injector for News sources using Pubsub I/O.
@@ -71,7 +70,13 @@ import com.sun.syndication.io.FeedException;
  * <p> To run this example using the Dataflow service, you must provide an
  * output pubsub topic for news, using the {@literal --inputTopic} option.
  * This injector can be run locally using the direct runner. </p>
- * E.g.: java -cp target/examples-1.jar com.google.cloud.dataflow.examples.StockInjector --runner=DirectPipelineRunner --project=google.com:clouddfe --stagingLocation=gs://clouddfe-test/staging-$USER  --outputTopic=/topics/google.com:clouddfe/stocks1w1
+ * E.g.:
+ * java -cp target/examples-1.jar \
+ *   com.google.cloud.dataflow.examples.StockInjector \
+ *   --runner=DirectPipelineRunner \
+ *   --project=google.com:clouddfe \
+ *   --stagingLocation=gs://clouddfe-test/staging-$USER \
+ *   --outputTopic=/topics/google.com:clouddfe/stocks1w1
  */
 
 
@@ -79,7 +84,7 @@ public class NewsInjector {
 
   class RetryHttpInitializerWrapper implements HttpRequestInitializer {
 
-    private Logger LOG =
+    private Logger logger =
         Logger.getLogger(RetryHttpInitializerWrapper.class.getName());
 
     // Intercepts the request for filling in the "Authorization"
@@ -92,51 +97,52 @@ public class NewsInjector {
     private final Sleeper sleeper;
 
     public RetryHttpInitializerWrapper(GoogleCredential wrappedCredential) {
-        this(wrappedCredential, Sleeper.DEFAULT);
+      this(wrappedCredential, Sleeper.DEFAULT);
     }
 
     // Use only for testing.
     RetryHttpInitializerWrapper(
             GoogleCredential wrappedCredential, Sleeper sleeper) {
-        this.wrappedCredential = Preconditions.checkNotNull(wrappedCredential);
-        this.sleeper = sleeper;
+      this.wrappedCredential = Preconditions.checkNotNull(wrappedCredential);
+      this.sleeper = sleeper;
     }
 
     @Override
     public void initialize(HttpRequest request) {
-        final HttpUnsuccessfulResponseHandler backoffHandler =
-            new HttpBackOffUnsuccessfulResponseHandler(
-                new ExponentialBackOff())
-                    .setSleeper(sleeper);
-        request.setInterceptor(wrappedCredential);
-        request.setUnsuccessfulResponseHandler(
-                new HttpUnsuccessfulResponseHandler() {
-                    @Override
-                    public boolean handleResponse(
-                            HttpRequest request,
-                            HttpResponse response,
-                            boolean supportsRetry) throws IOException {
-                        if (wrappedCredential.handleResponse(
-                                request, response, supportsRetry)) {
-                            // If credential decides it can handle it,
-                            // the return code or message indicated
-                            // something specific to authentication,
-                            // and no backoff is desired.
-                            return true;
-                        } else if (backoffHandler.handleResponse(
-                                request, response, supportsRetry)) {
-                            // Otherwise, we defer to the judgement of
-                            // our internal backoff handler.
-                          LOG.info("Retrying " + request.getUrl());
-                          return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                });
-        request.setIOExceptionHandler(
-            new HttpBackOffIOExceptionHandler(new ExponentialBackOff())
-                .setSleeper(sleeper));
+      final HttpUnsuccessfulResponseHandler backoffHandler =
+          new HttpBackOffUnsuccessfulResponseHandler(
+              new ExponentialBackOff())
+          .setSleeper(sleeper);
+      request.setInterceptor(wrappedCredential);
+      request.setUnsuccessfulResponseHandler(
+          new HttpUnsuccessfulResponseHandler() {
+              @Override
+              public boolean handleResponse(HttpRequest request,
+                                            HttpResponse response,
+                                            boolean supportsRetry)
+                  throws IOException {
+                if (wrappedCredential.handleResponse(request,
+                                                     response,
+                                                     supportsRetry)) {
+                  // If credential decides it can handle it, the
+                  // return code or message indicated something
+                  // specific to authentication, and no backoff is
+                  // desired.
+                  return true;
+                } else if (backoffHandler.handleResponse(request,
+                                                         response,
+                                                         supportsRetry)) {
+                  // Otherwise, we defer to the judgement of our
+                  // internal backoff handler.
+                  logger.info("Retrying " + request.getUrl());
+                  return true;
+                } else {
+                  return false;
+                }
+              }
+          });
+      request.setIOExceptionHandler(new HttpBackOffIOExceptionHandler(
+          new ExponentialBackOff()).setSleeper(sleeper));
     }
   }
 
@@ -145,21 +151,27 @@ public class NewsInjector {
 
   private Logger logger = Logger.getLogger(this.getClass().getName());
 
+  /**
+   * Fetches the news from news.google.com and returns the titles.
+   */
   public List<String> getNews() {
     // Get the top news stories.
     List<String> news = getNews("https://news.google.com/news?output=rss");
     // Get the top technology news stories.
     news.addAll(getNews(
-      "https://news.google.com/news?cf=all&ned=us&hl=en&topic=tc&output=rss"));
+        "https://news.google.com/news?cf=all&ned=us&hl=en&topic=tc&output=rss"));
     return news;
   }
 
-  public List<String> getNews(String newsURL) {
+  /**
+   * Fetches the news from the specified URL and returns the titles.
+   */
+  public List<String> getNews(String newsUrl) {
     // Fetch news titles:
     List<String> newsTitles = new ArrayList<String>();
     try {
       String rssFeed = new String();
-      URL feedSource = new URL(newsURL);
+      URL feedSource = new URL(newsUrl);
       SyndFeedInput fi = new SyndFeedInput();
       SyndFeed feed = fi.build(new XmlReader(feedSource));
       for (Iterator i = feed.getEntries().iterator(); i.hasNext(); ) {
@@ -183,11 +195,17 @@ public class NewsInjector {
     return newsTitles;
   }
 
+  /**
+   * A constructor of NewsInjector.
+   */
   public NewsInjector(Pubsub pubsub, String newsTopic) {
     this.pubsub = pubsub;
     this.newsTopic = newsTopic;
   }
 
+  /**
+   * Fetches the news titles and publishes them.
+   */
   public void publishNews() {
     List<String> newsItems = getNews();
     for (String news : newsItems) {
@@ -195,10 +213,14 @@ public class NewsInjector {
     }
   }
 
+  /**
+   * Publishes the given message to the given topic.
+   */
   public void publishMessage(String message, String outputTopic) {
     int maxLogMessageLength = 200;
-    if (message.length() < maxLogMessageLength)
+    if (message.length() < maxLogMessageLength) {
       maxLogMessageLength = message.length();
+    }
     logger.info("Received ...." + message.substring(0, maxLogMessageLength));
 
     // Publish message to Pubsub.
@@ -210,17 +232,20 @@ public class NewsInjector {
     try {
       this.pubsub.topics().publish(publishRequest).execute();
     } catch (java.io.IOException e) {
+      logger.warning(e.getStackTrace().toString());
     }
   }
 
-  public String getContent(String pageURL, String catPhrase) {
-    // Retrieve the contents of the webpage.
+  /**
+   * Retrieves the contents of the webpage.
+   */
+  public String getContent(String pageUrl, String catPhrase) {
     String content = new String();
     try {
-      URL url = new URL(pageURL);
+      URL url = new URL(pageUrl);
       URLConnection conn = url.openConnection();
       BufferedReader br =
-        new BufferedReader(new InputStreamReader(conn.getInputStream()));
+          new BufferedReader(new InputStreamReader(conn.getInputStream()));
       String inputLine;
       while ((inputLine = br.readLine()) != null) {
         content += catPhrase + inputLine;
@@ -234,10 +259,11 @@ public class NewsInjector {
     return content;
   }
 
+  private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 
-  private static final JsonFactory JSON_FACTORY =
-    JacksonFactory.getDefaultInstance();
-
+  /**
+   * Creates a Cloud Pub/Sub client.
+   */
   public Pubsub createPubsubClient()
     throws IOException, GeneralSecurityException {
     HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
@@ -247,6 +273,9 @@ public class NewsInjector {
     return new Pubsub.Builder(transport, JSON_FACTORY, initializer).build();
   }
 
+  /**
+   * Fetches news and publishes them to the specified Cloud Pub/Sub topic.
+   */
   public static void main(String[] args) throws Exception {
     // Get options from command-line.
     if (args.length < 1) {
@@ -258,15 +287,15 @@ public class NewsInjector {
 
     System.out.println("Output Pubsub topic: " + newsTopic);
 
-    NewsInjector f = new NewsInjector(null, "");
+    NewsInjector injector = new NewsInjector(null, "");
     // Create a Pubsub.
-    Pubsub client = f.createPubsubClient();
+    Pubsub client = injector.createPubsubClient();
 
-    NewsInjector x = new NewsInjector(client, newsTopic);
+    injector = new NewsInjector(client, newsTopic);
 
     while (true) {
       // Fetch news.
-      x.publishNews();
+      injector.publishNews();
 
       try {
         //thread to sleep for the specified number of milliseconds

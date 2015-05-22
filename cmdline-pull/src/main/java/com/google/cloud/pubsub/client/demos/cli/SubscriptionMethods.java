@@ -6,6 +6,7 @@ import com.google.api.services.pubsub.model.ListSubscriptionsResponse;
 import com.google.api.services.pubsub.model.PubsubMessage;
 import com.google.api.services.pubsub.model.PullRequest;
 import com.google.api.services.pubsub.model.PullResponse;
+import com.google.api.services.pubsub.model.PushConfig;
 import com.google.api.services.pubsub.model.ReceivedMessage;
 import com.google.api.services.pubsub.model.Subscription;
 
@@ -18,6 +19,9 @@ import java.util.List;
  */
 public class SubscriptionMethods {
 
+    /**
+     * Creates a new subscription.
+     */
     public static void createSubscription(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 4);
@@ -26,6 +30,9 @@ public class SubscriptionMethods {
         Subscription subscription = new Subscription()
                 .setTopic(PubsubUtils.getFullyQualifiedResourceName(
                         PubsubUtils.ResourceType.TOPIC, args[0], args[3]));
+        if (args.length == 5) {
+            subscription = subscription.setPushConfig(new PushConfig().setPushEndpoint(args[4]));
+        }
         subscription = client.projects().subscriptions()
                 .create(subscriptionName, subscription)
                 .execute();
@@ -34,6 +41,9 @@ public class SubscriptionMethods {
         System.out.println(subscription.toPrettyString());
     }
 
+    /**
+     * Keeps pulling messages from the given subscription.
+     */
     public static void pullMessages(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);
@@ -71,6 +81,9 @@ public class SubscriptionMethods {
         } while (System.getProperty(Main.LOOP_ENV_NAME) != null);
     }
 
+    /**
+     * Lists existing subscriptions within a project.
+     */
     public static void listSubscriptions(Pubsub client, String[] args)
             throws IOException {
         String nextPageToken = null;
@@ -97,6 +110,9 @@ public class SubscriptionMethods {
         }
     }
 
+    /**
+     * Deletes a subscription with a given name.
+     */
     public static void deleteSubscription(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);

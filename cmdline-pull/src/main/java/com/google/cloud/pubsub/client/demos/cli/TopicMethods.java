@@ -10,8 +10,8 @@ import com.google.common.collect.ImmutableList;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.List;
@@ -26,6 +26,9 @@ public class TopicMethods {
     private static final String BOT_NAME = "pubsub-irc-bot/1.0";
     private static final int PORT = 6667;
 
+    /**
+     * Creates a new topic with a given name.
+     */
     public static void createTopic(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);
@@ -37,18 +40,21 @@ public class TopicMethods {
         System.out.printf("Topic %s was created.\n", topic.getName());
     }
 
+    /**
+     * Connects an IRC channel and publish the chat messages to the given topic.
+     */
     public static void connectIrc(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 5);
-        String server = args[3];
-        String channel = args[4];
-        String topic = PubsubUtils.getFullyQualifiedResourceName(
+        final String server = args[3];
+        final String channel = args[4];
+        final String topic = PubsubUtils.getFullyQualifiedResourceName(
                 PubsubUtils.ResourceType.TOPIC, args[0], args[2]);
-        String nick = String.format("bot-%s", args[0]);
-        Socket socket = new Socket(server, PORT);
-        BufferedWriter writer = new BufferedWriter(
+        final String nick = String.format("bot-%s", args[0]);
+        final Socket socket = new Socket(server, PORT);
+        final BufferedWriter writer = new BufferedWriter(
                 new OutputStreamWriter(socket.getOutputStream()));
-        BufferedReader reader = new BufferedReader(
+        final BufferedReader reader = new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
 
         writer.write(String.format("NICK %s\r\n", nick));
@@ -70,7 +76,7 @@ public class TopicMethods {
         writer.flush();
 
         // A regex pattern for Wikipedia change log as of June 4, 2014
-        Pattern p = Pattern.compile(
+        Pattern pat = Pattern.compile(
                 "\\u000314\\[\\[\\u000307(.*)\\u000314\\]\\]\\u0003.*"
                         + "\\u000302(http://[^\\u0003]*)\\u0003");
         while ((line = reader.readLine()) != null) {
@@ -81,16 +87,17 @@ public class TopicMethods {
                 writer.flush();
             } else {
                 String privmsgMark = "PRIVMSG " + channel + " :";
-                int i = line.indexOf(privmsgMark);
-                if (i == -1) {
+                int prividx = line.indexOf(privmsgMark);
+                if (prividx == -1) {
                     continue;
                 }
-                line = line.substring(i + privmsgMark.length(), line.length());
+                line = line.substring(prividx + privmsgMark.length(),
+                                      line.length());
                 PubsubMessage pubsubMessage = new PubsubMessage();
-                Matcher m = p.matcher(line);
-                if (m.find()) {
+                Matcher matcher = pat.matcher(line);
+                if (matcher.find()) {
                     String message = String.format("Title: %s, Diff: %s",
-                            m.group(1), m.group(2));
+                            matcher.group(1), matcher.group(2));
                     pubsubMessage.encodeData(message.getBytes("UTF-8"));
                 } else {
                     pubsubMessage.encodeData(line.getBytes("UTF-8"));
@@ -105,6 +112,9 @@ public class TopicMethods {
         }
     }
 
+    /**
+     * Publishes the given message to the given topic.
+     */
     public static void publishMessage(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 4);
@@ -127,6 +137,9 @@ public class TopicMethods {
         }
     }
 
+    /**
+     * Deletes a topic with the given name.
+     */
     public static void deleteTopic(Pubsub client, String[] args)
             throws IOException {
         Main.checkArgsLength(args, 3);
@@ -136,6 +149,9 @@ public class TopicMethods {
         System.out.printf("Topic %s was deleted.\n", topicName);
     }
 
+    /**
+     * Lists existing topics in the project.
+     */
     public static void listTopics(Pubsub client, String[] args)
             throws IOException {
         String nextPageToken = null;

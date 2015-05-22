@@ -1,6 +1,7 @@
 package com.google.cloud.pubsub.client.demos.cli;
 
 import com.google.api.services.pubsub.Pubsub;
+
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -88,6 +89,9 @@ public class Main {
         }
     }
 
+    /**
+     * Prints out the usage to stderr.
+     */
     public static void help() {
         System.err.println("Usage: pubsub-sample.[sh|bat] [options] arguments");
         HelpFormatter formatter = new HelpFormatter();
@@ -98,7 +102,7 @@ public class Main {
                         + "PROJ create_topic TOPIC\n"
                         + "PROJ delete_topic TOPIC\n"
                         + "PROJ list_subscriptions\n"
-                        + "PROJ create_subscription SUBSCRIPTION LINKED_TOPIC\n"
+                        + "PROJ create_subscription SUBSCRIPTION LINKED_TOPIC [PUSH_ENDPOINT]\n"
                         + "PROJ delete_subscription SUBSCRIPTION\n"
                         + "PROJ connect_irc TOPIC SERVER CHANNEL\n"
                         + "PROJ publish_message TOPIC MESSAGE\n"
@@ -107,6 +111,9 @@ public class Main {
         writer.close();
     }
 
+    /**
+     * Parses the command line arguments and calls a corresponding method.
+     */
     public static void main(String[] args) throws Exception {
         CommandLineParser parser = new BasicParser();
         CommandLine cmd = parser.parse(options, args);

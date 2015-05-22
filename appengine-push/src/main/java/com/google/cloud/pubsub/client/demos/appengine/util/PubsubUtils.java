@@ -82,14 +82,20 @@ public final class PubsubUtils {
         return "subscription-" + getProjectId();
     }
 
+    /**
+     * Returns the push endpoint URL.
+     */
     public static String getAppEndpointUrl() {
         String subscriptionUniqueToken = System.getProperty(
                 Constants.BASE_PACKAGE + ".subscriptionUniqueToken");
 
-        return "https://" + getProjectId() + ".appspot.com/receive_message" +
-                "?token=" + subscriptionUniqueToken;
+        return "https://" + getProjectId() + ".appspot.com/receive_message"
+            + "?token=" + subscriptionUniqueToken;
     }
 
+    /**
+     * Returns the project ID.
+     */
     public static String getProjectId() {
         AppIdentityService identityService =
                 AppIdentityServiceFactory.getAppIdentityService();
