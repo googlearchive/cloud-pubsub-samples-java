@@ -29,3 +29,5 @@ release.properties
 .classpath
 .settings/
 .project
+
+service-account.json

@@ -23,7 +23,7 @@ public final class Main {
     }
 
     /**
-     * Pull batch seize.
+     * Pull batch size.
      */
     static final int BATCH_SIZE = 1000;
 
