@@ -79,7 +79,9 @@ public class PubsubIntegrationTest {
 
     @Test
     public void testPublishAndPullMessage() throws Exception {
-        String message = "hello";
+        // The message below is to check the descrepancy of base64
+        // bariants used on the server side and on the client side.
+        String message = "=@~a";
         String[] args = {PROJECT_ID, "publish_message", TOPIC_NAME, message};
         Main.main(args);
         assertThat(outContent.toString(),
