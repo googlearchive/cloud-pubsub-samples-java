@@ -34,7 +34,9 @@ public class IntegrationTest {
             PROJECT_ID = projectId;
         }
         UUID uuid = UUID.randomUUID();
-        MESSAGE = "test-message-" + uuid;
+        // The '=@~' part is for checking the descrepancy of base64
+        // variants used on the server side and on the client side.
+        MESSAGE = "=@~test-message-" + uuid;
     }
 
     private String getAppBaseURL() {
