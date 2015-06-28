@@ -26,8 +26,6 @@ need to set your JAVA_HOME.
 ## Configuration
 
 - Edit src/main/webapp/WEB-INF/appengine-web.xml, and:
-    - Enter the unique application ID (you chose it in the prior step)
-      between the <application> tags.
     - Set the
       com.google.cloud.pubsub.client.demos.appengine.subscriptionUniqueToken
       property with a unique alphanumeric combination of your choice.
@@ -43,7 +41,7 @@ need to set your JAVA_HOME.
 You can deploy the application by running:
 
 ```
-$ mvn gcloud:deploy
+$ mvn gcloud:deploy-Dgcloud.version=1 -DskipTests=true
 ```
 
 If this is the first time you have run "update" on the project, a
@@ -63,6 +61,7 @@ https://{your-application-id}.appspot.com/
 Then start your server by running:
 
 ```
+$ gcloud config set project <your-application-id>
 $ mvn gcloud:run
 ```
 
