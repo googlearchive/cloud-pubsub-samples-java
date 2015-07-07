@@ -5,6 +5,7 @@ cache:
         - ${HOME}/gcloud/
 jdk:
     - oraclejdk7
+    - oraclejdk8
 env: PATH=${PATH}:${HOME}/gcloud/google-cloud-sdk/bin GOOGLE_APPLICATION_CREDENTIALS=${TRAVIS_BUILD_DIR}/service-account.json
 before_install:
     - if [ ! -d ${HOME}/gcloud/google-cloud-sdk ]; then
