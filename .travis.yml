@@ -1,5 +1,8 @@
 sudo: false
 language: java
+branches:
+  only:
+    - master
 cache:
     directories:
         - ${HOME}/gcloud/
@@ -21,6 +24,7 @@ before_install:
           gcloud auth activate-service-account --key-file service-account.json;
       fi
     - gcloud config set project cloud-pubsub-sample-test
+    - gcloud config set app/use_appengine_api true
 install:
     - echo 'We do not run mvn install.'
 before_script:
