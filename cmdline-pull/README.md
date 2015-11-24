@@ -27,6 +27,9 @@ Install Maven and Java7.
   - GOOGLE_APPLICATION_CREDENTIALS: the file path to the downloaded JSON file.
 
 ## Build the application
+- Set the following environment variable.
+  - TEST_PROJECT_ID: the ID of your Google Cloud project.
+  - note: the above environment variable is only required during the build phase.
 
 ```
 $ mvn package
