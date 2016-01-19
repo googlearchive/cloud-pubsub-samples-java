@@ -5,10 +5,12 @@ with Java.
 
 - appengine-push
 
-  A sample for push subscription running on [Google App Engine][1].
+  A sample for push subscription running on [Google App Engine](https://cloud.google.com/appengine/docs).
 
 - cmdline-pull
 
   A command line sample for pull subscription.
 
-[1]: https://cloud.google.com/appengine/docs
+- dataflow
+
+  Few samples for [Cloud Dataflow](https://cloud.google.com/dataflow/) streaming.
