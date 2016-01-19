@@ -14,7 +14,7 @@
     <maven>3.1.0</maven>
   </prerequisites>
   <properties>
-    <appengine.version>1.9.23</appengine.version>
+    <appengine.version>1.9.28</appengine.version>
     <google-api-client.version>1.20.0</google-api-client.version>
     <google-api-pubsub.version>v1-rev2-1.20.0</google-api-pubsub.version>
     <webappDirectory>
@@ -96,7 +96,7 @@
       <plugin>
         <groupId>com.google.appengine</groupId>
         <artifactId>gcloud-maven-plugin</artifactId>
-        <version>0.9.65.v20150618</version>
+        <version>2.0.9.86.v20151113</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
