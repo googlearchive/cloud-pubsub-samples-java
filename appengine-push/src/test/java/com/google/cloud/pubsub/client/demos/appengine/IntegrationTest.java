@@ -1,11 +1,12 @@
 package com.google.cloud.pubsub.client.demos.appengine;
 
-import org.junit.After;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -18,12 +19,11 @@ import static org.hamcrest.CoreMatchers.*;
 
 public class IntegrationTest {
 
-    private static final String DEFAULT_TEST_PROJECT_ID =
-            "cloud-pubsub-sample-test";
+    private static final String DEFAULT_TEST_PROJECT_ID = "cloud-pubsub-sample-test";
     private static final String TEST_PROJECT_ID_ENV = "TEST_PROJECT_ID";
     private static final String PROJECT_ID;
     private static final String MESSAGE;
-    private static final int MAX_RETRY = 3;
+    private static final int MAX_RETRY = 10;
     private static final long SLEEP_TIME = 1000L;
 
     static {
@@ -41,6 +41,20 @@ public class IntegrationTest {
 
     private String getAppBaseURL() {
         return "https://" + PROJECT_ID + ".appspot.com/";
+    }
+
+    private boolean hasCredentials() {
+        String credentialsFile = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+        File f = new File(credentialsFile);
+        if(f.exists() && !f.isDirectory()) {
+            return true;
+        }
+        return false;
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        Assume.assumeTrue(hasCredentials());
     }
 
     @Test
@@ -123,6 +137,6 @@ public class IntegrationTest {
                 break;
             }
         }
-        assertTrue(found);
+        assertTrue("We didn't get the expected message.", found);
     }
 }

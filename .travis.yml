@@ -15,10 +15,12 @@ before_install:
           wget https://dl.google.com/dl/cloudsdk/release/google-cloud-sdk.tar.gz --directory-prefix=${HOME}/gcloud &&
           cd ${HOME}/gcloud &&
           tar xzf google-cloud-sdk.tar.gz &&
-          printf '\ny\n\ny\ny\n' | ./google-cloud-sdk/install.sh &&
+          ./google-cloud-sdk/install.sh --usage-reporting false --path-update false --command-completion false &&
           cd ${TRAVIS_BUILD_DIR};
       fi
-    - openssl aes-256-cbc -K $encrypted_da6c5a15484c_key -iv $encrypted_da6c5a15484c_iv -in service-account.json.enc -out service-account.json -d
+    - if [ "true" == ${TRAVIS_SECURE_ENV_VARS} ]; then
+          openssl aes-256-cbc -K $encrypted_da6c5a15484c_key -iv $encrypted_da6c5a15484c_iv -in service-account.json.enc -out service-account.json -d;
+      fi
     - gcloud -q components update gae-java gae-python
     - if [ -a service-account.json ]; then
           gcloud auth activate-service-account --key-file service-account.json;
@@ -29,6 +31,8 @@ install:
     - echo 'We do not run mvn install.'
 before_script:
     - mvn clean
-    - mvn -f appengine-push/pom.xml gcloud:deploy -Dgcloud.gcloud_directory=${HOME}/gcloud/google-cloud-sdk -Dgcloud.version=1 -DskipTests=true
+    - if [ -a service-account.json ]; then
+          mvn -f appengine-push/pom.xml gcloud:deploy -Dgcloud.gcloud_directory=${HOME}/gcloud/google-cloud-sdk -Dgcloud.version=1 -DskipTests=true;
+      fi
 script:
     - mvn test
