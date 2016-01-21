@@ -10,7 +10,7 @@ Install Maven and Java7.
 
 ## Register your application and create a topic
 
-- If you don't have a project, go to [Google Developers Console][1]
+- If you don't have a project, go to [Google Developers Console](https://console.developers.google.com/)
   and create a new project.
 
 - Enable the "Google Cloud Pub/Sub" API under "APIs & auth > APIs."
