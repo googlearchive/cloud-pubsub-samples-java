@@ -14,3 +14,7 @@ with Java.
 - dataflow
 
   Few samples for [Cloud Dataflow](https://cloud.google.com/dataflow/) streaming.
+
+- grpc
+
+  A sample for accessing Cloud Pub/Sub with [gRPC](http://www.grpc.io/).

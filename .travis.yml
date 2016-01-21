@@ -1,4 +1,4 @@
-sudo: false
+sudo: true
 language: java
 branches:
   only:
@@ -8,7 +8,7 @@ cache:
         - ${HOME}/gcloud/
 jdk:
     - oraclejdk7
-env: PATH=${PATH}:${HOME}/gcloud/google-cloud-sdk/bin GOOGLE_APPLICATION_CREDENTIALS=${TRAVIS_BUILD_DIR}/service-account.json
+env: PATH=${HOME}/gcloud/google-cloud-sdk/bin:${PATH} GOOGLE_APPLICATION_CREDENTIALS=${TRAVIS_BUILD_DIR}/service-account.json
 before_install:
     - if [ ! -d ${HOME}/gcloud/google-cloud-sdk ]; then
           mkdir -p ${HOME}/gcloud &&
@@ -36,3 +36,13 @@ before_script:
       fi
 script:
     - mvn test
+    # Currently it's our e2e test!
+    - if [ "true" == ${TRAVIS_SECURE_ENV_VARS} ]; then
+        sudo apt-get update &&
+        sudo apt-get install -y libengine-pkcs11-openssl &&
+        cd grpc &&
+        git submodule update --init &&
+        mvn compile &&
+        mvn assembly:single &&
+        bin/pubsub-sample.sh cloud-pubsub-sample-test;
+      fi
