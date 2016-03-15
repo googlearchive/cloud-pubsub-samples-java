@@ -46,6 +46,7 @@ public final class Main {
                 .setProject("projects/" + project)
                 .build();
         ListTopicsResponse resp = publisherStub.listTopics(request);
+        System.out.println("Found " + resp.getTopicsCount() + " topics.");
         for (Topic topic : resp.getTopicsList()) {
             System.out.println(topic.getName());
         }
