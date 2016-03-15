@@ -127,7 +127,7 @@
       <!--
         It is recommended to use OpenSSL: Statically Linked Netty for transport security.
         These steps do not use the TLS that comes with JDK (Jetty APLN/NPN), which is not
-        recommended. See https://github.com/grpc/grpc-java/blob/v0.13.x/SECURITY.md
+        recommended. See https://github.com/grpc/grpc-java/blob/master/SECURITY.md
         for details.
       -->
       <groupId>io.netty</groupId>
