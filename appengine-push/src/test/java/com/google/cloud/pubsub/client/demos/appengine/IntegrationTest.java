@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -104,6 +105,29 @@ public class IntegrationTest {
         return response.toString();
     }
 
+    @Test
+    public void testPushHandlerIsProtected() throws Exception {
+        String url = getAppBaseURL() + "_ah/push-handlers/receive_message";
+        URL obj = new URL(url);
+        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+        String urlParams = "p1=a";
+        byte[] postData = urlParams.getBytes( StandardCharsets.UTF_8 );
+        con.setInstanceFollowRedirects(false);
+        con.setRequestMethod("POST");
+        con.setDoOutput(true);
+        con.setRequestProperty(
+                "Content-Length", Integer.toString(postData.length));
+        con.setRequestProperty(
+                "Content-Type", "application/x-www-form-urlencoded");
+        try(DataOutputStream wr = new DataOutputStream(
+                con.getOutputStream())) {
+            wr.write(postData);
+            wr.flush();
+        }
+        int responseCode = con.getResponseCode();
+        assertEquals(302, responseCode);
+    }
+    
     @Test
     public void testSendMessage() throws Exception {
         String url = getAppBaseURL() + "send_message";
