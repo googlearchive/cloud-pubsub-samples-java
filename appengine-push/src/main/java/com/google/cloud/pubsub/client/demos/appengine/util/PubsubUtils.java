@@ -113,7 +113,8 @@ public final class PubsubUtils {
         String subscriptionUniqueToken = System.getProperty(
                 Constants.BASE_PACKAGE + ".subscriptionUniqueToken");
 
-        return "https://" + getProjectId() + ".appspot.com/receive_message"
+        return "https://" + getProjectId()
+            + ".appspot.com/_ah/push-handlers/receive_message"
             + "?token=" + subscriptionUniqueToken;
     }
 

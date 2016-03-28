@@ -42,7 +42,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>Receive_Servlet</servlet-name>
-    <url-pattern>/receive_message</url-pattern>
+    <url-pattern>/_ah/push-handlers/receive_message</url-pattern>
   </servlet-mapping>
   <welcome-file-list>
     <welcome-file>init_servlet</welcome-file>
