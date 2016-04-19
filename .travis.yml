@@ -22,6 +22,7 @@ before_install:
           openssl aes-256-cbc -K $encrypted_da6c5a15484c_key -iv $encrypted_da6c5a15484c_iv -in service-account.json.enc -out service-account.json -d;
       fi
     - gcloud -q components update gae-java gae-python
+    - gcloud -q components update --version 104.0.0
     - if [ -a service-account.json ]; then
           gcloud auth activate-service-account --key-file service-account.json;
       fi

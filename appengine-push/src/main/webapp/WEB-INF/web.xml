@@ -42,8 +42,17 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>Receive_Servlet</servlet-name>
-    <url-pattern>/receive_message</url-pattern>
+    <url-pattern>/_ah/push-handlers/receive_message</url-pattern>
   </servlet-mapping>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>push-handlers</web-resource-name>
+      <url-pattern>/_ah/push-handlers/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>admin</role-name>
+    </auth-constraint>
+  </security-constraint>
   <welcome-file-list>
     <welcome-file>init_servlet</welcome-file>
   </welcome-file-list>
