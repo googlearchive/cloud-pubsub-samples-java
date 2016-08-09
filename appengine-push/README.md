@@ -41,7 +41,7 @@ need to set your JAVA_HOME.
 You can deploy the application by running:
 
 ```
-$ mvn gcloud:deploy-Dgcloud.version=1 -DskipTests=true
+$ mvn gcloud:deploy -Dgcloud.version=1 -DskipTests=true
 ```
 
 If this is the first time you have run "update" on the project, a
