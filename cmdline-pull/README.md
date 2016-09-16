@@ -5,7 +5,7 @@
 This is a command line sample application using the Cloud Pub/Sub
 API. You can do the following things with this command line tool:
 
-- Connect to an IRC channel and publish IRC massages.
+- Connect to an IRC channel and publish IRC messages.
 - Pull messages from a subscription and print those messages.
 
 ## Prerequisites
