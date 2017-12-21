@@ -1,5 +1,7 @@
 # Cloud Pub/Sub samples for Java
 
+**This repository is deprecated.** Please refer to the official [Cloud Pub/Sub](https://cloud.google.com/pubsub/docs/quickstart-client-libraries#pubsub-client-libraries-java)  documentation for most recent samples and instructions. 
+
 This repository contains several samples for [Cloud Pub/Sub service](https://cloud.google.com/pubsub/)
 with Java.
 
