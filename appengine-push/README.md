@@ -2,7 +2,7 @@
 
 This project is no longer actively developed or maintained.
 
-For new work on this check out [relevant link](link to my repository)
+For new work on this check out [App Engine Java 8 for Cloud Pub/Sub](https://github.com/GoogleCloudPlatform/java-docs-samples/tree/master/appengine-java8/pubsub).
 
 # cloud-pubsub-samples-java
 
